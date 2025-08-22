@@ -8,6 +8,24 @@ const BadmintonGame = () => {
   const phaserGameRef = useRef<any>(null);
 
   useEffect(() => {
+    // Check orientation and pause game if in portrait mode on mobile
+    const handleOrientationChange = () => {
+      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+        const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+        if (phaserGameRef.current?.scene?.isActive('BadmintonScene')) {
+          if (isPortrait) {
+            phaserGameRef.current.scene.pause('BadmintonScene');
+          } else {
+            phaserGameRef.current.scene.resume('BadmintonScene');
+          }
+        }
+      }
+    };
+
+    // Listen for orientation changes
+    const orientationMediaQuery = window.matchMedia('(orientation: portrait)');
+    orientationMediaQuery.addEventListener('change', handleOrientationChange);
+
     const initGame = async () => {
       if (typeof window === 'undefined') return;
       
@@ -15,8 +33,14 @@ const BadmintonGame = () => {
 
       class BadmintonScene extends Phaser.Scene {
         private shuttlecock!: Phaser.Physics.Arcade.Image;
+        private shuttlecockShadow!: Phaser.GameObjects.Ellipse;
         private gameState: 'playing' | 'missed' = 'playing';
         private lastLogTime: number = 0;
+        private courtBottom!: number;
+        private courtTop!: number;
+        private courtNearWidth!: number;
+        private courtFarWidth!: number;
+        private courtCenterX!: number;
         
         constructor() {
           super({ key: 'BadmintonScene' });
@@ -44,23 +68,121 @@ const BadmintonGame = () => {
         create() {
           const { width, height } = this.scale;
 
-          // Create court background
-          this.add.tileSprite(0, height - 100, width, 100, 'court')
-            .setOrigin(0, 0)
-            .setTint(0x228b22);
+          // Court dimensions for trapezoid perspective
+          this.courtBottom = height - 50;
+          this.courtTop = height - 250;
+          this.courtNearWidth = width * 0.9;
+          this.courtFarWidth = width * 0.5;
+          this.courtCenterX = width / 2;
+          
+          const courtBottom = this.courtBottom;
+          const courtTop = this.courtTop;
+          const courtNearWidth = this.courtNearWidth;
+          const courtFarWidth = this.courtFarWidth;
+          const courtCenterX = this.courtCenterX;
+          
+          // Calculate trapezoid corners
+          const nearLeft = courtCenterX - courtNearWidth / 2;
+          const nearRight = courtCenterX + courtNearWidth / 2;
+          const farLeft = courtCenterX - courtFarWidth / 2;
+          const farRight = courtCenterX + courtFarWidth / 2;
+
+          // Create gradient court background using graphics
+          const courtGraphics = this.add.graphics();
+          
+          // Draw trapezoid court with gradient effect
+          courtGraphics.fillGradientStyle(0x2d5016, 0x2d5016, 0x3a6318, 0x3a6318, 1);
+          courtGraphics.beginPath();
+          courtGraphics.moveTo(nearLeft, courtBottom);
+          courtGraphics.lineTo(nearRight, courtBottom);
+          courtGraphics.lineTo(farRight, courtTop);
+          courtGraphics.lineTo(farLeft, courtTop);
+          courtGraphics.closePath();
+          courtGraphics.fillPath();
+
+          // Add court outline
+          courtGraphics.lineStyle(3, 0xffffff, 1);
+          courtGraphics.strokePath();
 
           // Add court lines
-          this.add.rectangle(0, height - 100, width, 4, 0xffffff).setOrigin(0, 0);
-          this.add.rectangle(0, height - 4, width, 4, 0xffffff).setOrigin(0, 0);
+          const lineGraphics = this.add.graphics();
+          lineGraphics.lineStyle(2, 0xffffff, 0.9);
+          
+          // Service lines (parallel to baseline)
+          const serviceLine1Y = courtBottom - (courtBottom - courtTop) * 0.25;
+          const serviceLine2Y = courtBottom - (courtBottom - courtTop) * 0.75;
+          
+          // Calculate line positions with perspective
+          const getXAtY = (y: number, leftX: number, rightX: number) => {
+            const t = (y - courtBottom) / (courtTop - courtBottom);
+            return {
+              left: nearLeft + (farLeft - nearLeft) * t,
+              right: nearRight + (farRight - nearRight) * t
+            };
+          };
+          
+          // Near service line
+          const service1 = getXAtY(serviceLine1Y, nearLeft, nearRight);
+          lineGraphics.strokeLineShape(new Phaser.Geom.Line(service1.left, serviceLine1Y, service1.right, serviceLine1Y));
+          
+          // Far service line
+          const service2 = getXAtY(serviceLine2Y, nearLeft, nearRight);
+          lineGraphics.strokeLineShape(new Phaser.Geom.Line(service2.left, serviceLine2Y, service2.right, serviceLine2Y));
+          
+          // Center line
+          lineGraphics.strokeLineShape(new Phaser.Geom.Line(
+            (nearLeft + nearRight) / 2, courtBottom,
+            (farLeft + farRight) / 2, courtTop
+          ));
+          
+          // Singles sidelines (inner lines)
+          const singlesOffset = 0.85;
+          lineGraphics.strokeLineShape(new Phaser.Geom.Line(
+            nearLeft + (nearRight - nearLeft) * (1 - singlesOffset) / 2, courtBottom,
+            farLeft + (farRight - farLeft) * (1 - singlesOffset) / 2, courtTop
+          ));
+          lineGraphics.strokeLineShape(new Phaser.Geom.Line(
+            nearRight - (nearRight - nearLeft) * (1 - singlesOffset) / 2, courtBottom,
+            farRight - (farRight - farLeft) * (1 - singlesOffset) / 2, courtTop
+          ));
 
-          // Add net in center
-          const net = this.add.image(width / 2, height - 100, 'net')
-            .setOrigin(0.5, 1)
-            .setScale(1, 1.5);
+          // Add net in center with perspective
+          const netY = (courtBottom + courtTop) / 2;
+          const netPos = getXAtY(netY, nearLeft, nearRight);
+          const netGraphics = this.add.graphics();
+          
+          // Net posts
+          netGraphics.fillStyle(0x808080, 1);
+          netGraphics.fillRect(netPos.left - 3, netY - 60, 6, 65);
+          netGraphics.fillRect(netPos.right - 3, netY - 60, 6, 65);
+          
+          // Net mesh with perspective
+          netGraphics.lineStyle(1, 0xffffff, 0.8);
+          const netHeight = 50;
+          
+          // Vertical lines
+          for (let i = 0; i <= 20; i++) {
+            const x = netPos.left + (netPos.right - netPos.left) * (i / 20);
+            netGraphics.strokeLineShape(new Phaser.Geom.Line(x, netY, x, netY - netHeight));
+          }
+          
+          // Horizontal lines
+          for (let i = 0; i <= 5; i++) {
+            const y = netY - netHeight * (i / 5);
+            netGraphics.strokeLineShape(new Phaser.Geom.Line(netPos.left, y, netPos.right, y));
+          }
+          
+          // Top tape of net
+          netGraphics.lineStyle(3, 0xffffff, 1);
+          netGraphics.strokeLineShape(new Phaser.Geom.Line(netPos.left, netY - netHeight, netPos.right, netY - netHeight));
 
+
+          // Add shuttlecock shadow
+          this.shuttlecockShadow = this.add.ellipse(width - 100, courtBottom - 10, 20, 10, 0x000000, 0.3)
+            .setOrigin(0.5, 0.5);
 
           // Add shuttlecock as physics object
-          this.shuttlecock = this.physics.add.image(width - 100, height - 300, 'shuttlecock')
+          this.shuttlecock = this.physics.add.image(width - 100, courtBottom - 100, 'shuttlecock')
             .setOrigin(0.5, 0.5);
 
           // Start initial serve from right side
@@ -89,26 +211,49 @@ const BadmintonGame = () => {
             const x = this.shuttlecock.x;
             const y = this.shuttlecock.y;
             
+            // Calculate depth-based scaling
+            const depthRatio = (y - this.courtTop) / (this.courtBottom - this.courtTop);
+            const scale = 0.5 + (depthRatio * 0.5); // Scale from 0.5 (far) to 1.0 (near)
+            this.shuttlecock.setScale(scale);
+            
             // Debug: log position periodically
             if (Math.floor(this.time.now / 1000) !== this.lastLogTime) {
-              console.log('Shuttlecock position:', x, y, 'Boundaries: x<0 or x>' + width + ' or y>' + height);
+              console.log('Shuttlecock position:', x, y, 'Scale:', scale.toFixed(2));
               this.lastLogTime = Math.floor(this.time.now / 1000);
             }
             
-            // Check all boundaries
-            if (x < 0 || x > width || y > height) {
+            // Check boundaries with court perspective
+            const courtLeftX = this.getCourtXAtY(y).left;
+            const courtRightX = this.getCourtXAtY(y).right;
+            
+            if (x < courtLeftX || x > courtRightX || y > this.courtBottom || y < this.courtTop - 50) {
               console.log('Boundary crossed! Position:', x, y, 'Game state:', this.gameState);
               this.gameOver();
             }
           }
         }
+        
+        getCourtXAtY(y: number) {
+          const t = Math.max(0, Math.min(1, (y - this.courtBottom) / (this.courtTop - this.courtBottom)));
+          const nearLeft = this.courtCenterX - this.courtNearWidth / 2;
+          const nearRight = this.courtCenterX + this.courtNearWidth / 2;
+          const farLeft = this.courtCenterX - this.courtFarWidth / 2;
+          const farRight = this.courtCenterX + this.courtFarWidth / 2;
+          
+          return {
+            left: nearLeft + (farLeft - nearLeft) * t,
+            right: nearRight + (farRight - nearRight) * t
+          };
+        }
 
         serveShuttlecock() {
-          const { width } = this.scale;
+          // Serve from far right side of court with proper perspective
+          const serveY = this.courtTop + 50;
+          const courtBounds = this.getCourtXAtY(serveY);
           
           // Reset position and serve from right side
-          this.shuttlecock.setPosition(width - 100, 200);
-          this.shuttlecock.setVelocity(-200, 30); // More forward momentum
+          this.shuttlecock.setPosition(courtBounds.right - 20, serveY);
+          this.shuttlecock.setVelocity(-150, 80); // Adjusted for perspective
           this.gameState = 'playing';
         }
 
@@ -194,6 +339,9 @@ const BadmintonGame = () => {
     initGame();
 
     return () => {
+      // Clean up orientation listener
+      orientationMediaQuery.removeEventListener('change', handleOrientationChange);
+      
       if (phaserGameRef.current) {
         phaserGameRef.current.destroy(true);
         phaserGameRef.current = null;
