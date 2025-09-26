@@ -82,11 +82,11 @@ const BadmintonGame = () => {
         create() {
           const { width, height } = this.scale;
 
-          // Court dimensions for trapezoid perspective
-          this.courtBottom = height - 50;
-          this.courtTop = height - 250;
-          this.courtNearWidth = width * 0.9;
-          this.courtFarWidth = width * 0.5;
+          // Court dimensions for trapezoid perspective (10% larger, bottom aligned)
+          this.courtBottom = height;
+          this.courtTop = height - 220;
+          this.courtNearWidth = width * 0.99;
+          this.courtFarWidth = width * 0.55;
           this.courtCenterX = width / 2;
           
           const courtBottom = this.courtBottom;
@@ -202,7 +202,7 @@ const BadmintonGame = () => {
 
 
           // Add shuttlecock as physics object
-          this.shuttlecock = this.physics.add.image(width - 100, courtBottom - 100, 'shuttlecock')
+          this.shuttlecock = this.physics.add.image(width - 100, courtBottom - 120, 'shuttlecock')
             .setOrigin(0.5, 0.5);
 
           // Start initial serve from right side
@@ -289,8 +289,8 @@ const BadmintonGame = () => {
               this.computerHasHit = false;
             }
 
-            // Check boundaries - only game over when hitting bottom line
-            if (y > this.courtBottom) {
+            // Check boundaries - only game over when hitting bottom line (with small buffer since court is at screen edge)
+            if (y > this.courtBottom - 10) {
               console.log('Bottom boundary crossed! Position:', x, y, 'Game state:', this.gameState);
               this.gameOver();
             }
@@ -513,8 +513,9 @@ const BadmintonGame = () => {
           this.computerHasHit = false;
           this.computerHitTimer = 0;
 
-          // Stop shuttlecock movement
+          // Stop shuttlecock movement and pause the scene
           this.shuttlecock.setVelocity(0, 0);
+          this.physics.pause();
 
           // Show game over message
           const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Missed! Tap to restart', {
@@ -531,6 +532,9 @@ const BadmintonGame = () => {
           this.input.once('pointerdown', () => {
             console.log('Restart tapped');
             gameOverText.destroy();
+
+            // Resume physics before serving
+            this.physics.resume();
             this.serveShuttlecock();
 
             // Re-initialize swipe handlers for gameplay
