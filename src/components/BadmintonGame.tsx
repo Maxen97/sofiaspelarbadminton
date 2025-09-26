@@ -47,6 +47,9 @@ const BadmintonGame = () => {
         private swipeStartTime: number = 0;
         private isSwipingActive: boolean = false;
         private swipeTrail: Phaser.GameObjects.Graphics | null = null;
+
+        // Air resistance for realistic shuttlecock physics
+        private airResistanceCoefficient: number = 0.004;
         
         constructor() {
           super({ key: 'BadmintonScene' });
@@ -219,18 +222,45 @@ const BadmintonGame = () => {
             const { width, height } = this.scale;
             const x = this.shuttlecock.x;
             const y = this.shuttlecock.y;
-            
+
+            // Apply air resistance for realistic shuttlecock physics
+            const currentVelocity = this.shuttlecock.body.velocity;
+            const speed = Math.sqrt(currentVelocity.x * currentVelocity.x + currentVelocity.y * currentVelocity.y);
+
+            if (speed > 10) { // Only apply drag if moving significantly
+              // Drag force opposes motion direction
+              const dragMagnitude = this.airResistanceCoefficient * speed;
+              const dragX = -(currentVelocity.x / speed) * dragMagnitude;
+              const dragY = -(currentVelocity.y / speed) * dragMagnitude;
+
+              // Apply drag as deceleration
+              const newVelX = currentVelocity.x + dragX;
+              const newVelY = currentVelocity.y + dragY;
+
+              // Prevent reversing direction from drag (maintain motion direction)
+              if (Math.sign(newVelX) === Math.sign(currentVelocity.x) || Math.abs(newVelX) > Math.abs(currentVelocity.x)) {
+                this.shuttlecock.setVelocityX(newVelX);
+              } else {
+                this.shuttlecock.setVelocityX(0);
+              }
+              if (Math.sign(newVelY) === Math.sign(currentVelocity.y) || Math.abs(newVelY) > Math.abs(currentVelocity.y)) {
+                this.shuttlecock.setVelocityY(newVelY);
+              } else {
+                this.shuttlecock.setVelocityY(0);
+              }
+            }
+
             // Calculate depth-based scaling
             const depthRatio = (y - this.courtTop) / (this.courtBottom - this.courtTop);
             const scale = 0.5 + (depthRatio * 0.5); // Scale from 0.5 (far) to 1.0 (near)
             this.shuttlecock.setScale(scale);
-            
-            // Debug: log position periodically
+
+            // Debug: log position and velocity periodically
             if (Math.floor(this.time.now / 1000) !== this.lastLogTime) {
-              console.log('Shuttlecock position:', x, y, 'Scale:', scale.toFixed(2));
+              console.log('Shuttlecock - pos:', x.toFixed(1), y.toFixed(1), 'vel:', currentVelocity.x.toFixed(1), currentVelocity.y.toFixed(1), 'speed:', speed.toFixed(1));
               this.lastLogTime = Math.floor(this.time.now / 1000);
             }
-            
+
             // Check boundaries - only game over when hitting bottom line
             if (y > this.courtBottom) {
               console.log('Bottom boundary crossed! Position:', x, y, 'Game state:', this.gameState);
@@ -433,7 +463,7 @@ const BadmintonGame = () => {
         physics: {
           default: 'arcade',
           arcade: {
-            gravity: { x: 0, y: 80 },
+            gravity: { x: 0, y: 100 },
             debug: false
           }
         },
