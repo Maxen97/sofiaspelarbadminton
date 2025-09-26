@@ -50,6 +50,11 @@ const BadmintonGame = () => {
 
         // Air resistance for realistic shuttlecock physics
         private airResistanceCoefficient: number = 0.025;
+
+        // Computer AI variables
+        private computerHasHit: boolean = false;
+        private computerHitDelay: number = 0;
+        private computerHitTimer: number = 0;
         
         constructor() {
           super({ key: 'BadmintonScene' });
@@ -261,12 +266,73 @@ const BadmintonGame = () => {
               this.lastLogTime = Math.floor(this.time.now / 1000);
             }
 
+            // Computer AI - check if shuttlecock is on computer side
+            if (x > width / 2 && !this.computerHasHit && currentVelocity.x > 0) {
+              // Shuttlecock has entered computer's side moving towards them
+              if (!this.computerHitTimer) {
+                // Set random reaction delay (200-400ms)
+                const reactionDelay = 200 + Math.random() * 200;
+                this.computerHitTimer = this.time.now + reactionDelay;
+                console.log('Computer preparing to hit in', reactionDelay.toFixed(0), 'ms');
+              }
+
+              // Check if it's time to hit
+              if (this.time.now >= this.computerHitTimer) {
+                this.computerReturnShot();
+                this.computerHasHit = true;
+                this.computerHitTimer = 0;
+              }
+            }
+
+            // Reset computer hit flag when ball returns to player side
+            if (x < width / 2 && currentVelocity.x < 0) {
+              this.computerHasHit = false;
+            }
+
             // Check boundaries - only game over when hitting bottom line
             if (y > this.courtBottom) {
               console.log('Bottom boundary crossed! Position:', x, y, 'Game state:', this.gameState);
               this.gameOver();
             }
           }
+        }
+
+        computerReturnShot() {
+          console.log('Computer is returning the shot!');
+
+          // Random shot selection with different probabilities
+          const shotType = Math.random();
+          let horizontalVelocity, verticalVelocity;
+          let shotName;
+
+          if (shotType < 0.3) {
+            // Smash (30% chance) - fast and downward
+            horizontalVelocity = -700 - Math.random() * 200; // -700 to -900
+            verticalVelocity = 100 + Math.random() * 150; // 100 to 250 (downward)
+            shotName = 'smash';
+          } else if (shotType < 0.6) {
+            // Drive (30% chance) - fast and flat
+            horizontalVelocity = -600 - Math.random() * 150; // -600 to -750
+            verticalVelocity = -50 + Math.random() * 100; // -50 to 50 (flat)
+            shotName = 'drive';
+          } else if (shotType < 0.85) {
+            // Clear (25% chance) - high arc
+            horizontalVelocity = -400 - Math.random() * 100; // -400 to -500
+            verticalVelocity = -250 - Math.random() * 100; // -250 to -350 (high)
+            shotName = 'clear';
+          } else {
+            // Drop shot (15% chance) - slow and short
+            horizontalVelocity = -300 - Math.random() * 100; // -300 to -400
+            verticalVelocity = -100 - Math.random() * 50; // -100 to -150
+            shotName = 'drop shot';
+          }
+
+          // Add slight placement variation
+          const placementVariation = (Math.random() - 0.5) * 40;
+          verticalVelocity += placementVariation;
+
+          this.shuttlecock.setVelocity(horizontalVelocity, verticalVelocity);
+          console.log(`Computer returns with ${shotName}: vel(${horizontalVelocity.toFixed(0)}, ${verticalVelocity.toFixed(0)})`);
         }
 
         setupSwipeHandlers() {
@@ -384,6 +450,10 @@ const BadmintonGame = () => {
 
           this.shuttlecock.setVelocity(randomHorizontalSpeed, randomVerticalSpeed);
           this.gameState = 'playing';
+
+          // Reset computer AI state
+          this.computerHasHit = false;
+          this.computerHitTimer = 0;
         }
 
         hitShuttlecockWithSwipe(swipeVector: { x: number; y: number }, swipeDuration: number) {
@@ -438,6 +508,10 @@ const BadmintonGame = () => {
 
           // Reset any active swipe state
           this.resetSwipeState();
+
+          // Reset computer AI state
+          this.computerHasHit = false;
+          this.computerHitTimer = 0;
 
           // Stop shuttlecock movement
           this.shuttlecock.setVelocity(0, 0);
