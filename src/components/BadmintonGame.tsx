@@ -146,40 +146,46 @@ const BadmintonGame = () => {
             farRight - (farRight - farLeft) * (1 - singlesOffset) / 2, courtTop
           ));
 
-          // Add net in center with perspective
-          const netY = (courtBottom + courtTop) / 2;
-          const netPos = getXAtY(netY, nearLeft, nearRight);
+          // Add vertical net with perspective
           const netGraphics = this.add.graphics();
           
-          // Net posts
+          // Net posts - vertical configuration with offset for depth
+          const topPostX = courtCenterX - 10; // Left offset for top post
+          const bottomPostX = courtCenterX + 10; // Right offset for bottom post
+          
           netGraphics.fillStyle(0x808080, 1);
-          netGraphics.fillRect(netPos.left - 3, netY - 60, 6, 65);
-          netGraphics.fillRect(netPos.right - 3, netY - 60, 6, 65);
+          // Top post (at top center, shifted left)
+          netGraphics.fillRect(topPostX - 3, courtTop - 5, 6, 65);
+          // Bottom post (at bottom center, shifted right)
+          netGraphics.fillRect(bottomPostX - 3, courtBottom - 60, 6, 65);
           
-          // Net mesh with perspective
+          // Net mesh spanning vertically between posts
           netGraphics.lineStyle(1, 0xffffff, 0.8);
-          const netHeight = 50;
+          const netWidth = 50; // Width of the net mesh
           
-          // Vertical lines
+          // Vertical lines running from top to bottom
           for (let i = 0; i <= 20; i++) {
-            const x = netPos.left + (netPos.right - netPos.left) * (i / 20);
-            netGraphics.strokeLineShape(new Phaser.Geom.Line(x, netY, x, netY - netHeight));
+            const t = i / 20;
+            const x1 = topPostX + (bottomPostX - topPostX) * t;
+            const y1 = courtTop + (courtBottom - courtTop) * t;
+            const x2 = x1 - netWidth;
+            netGraphics.strokeLineShape(new Phaser.Geom.Line(x1, y1, x2, y1));
           }
           
-          // Horizontal lines
+          // Horizontal lines across the net
           for (let i = 0; i <= 5; i++) {
-            const y = netY - netHeight * (i / 5);
-            netGraphics.strokeLineShape(new Phaser.Geom.Line(netPos.left, y, netPos.right, y));
+            const xOffset = netWidth * (i / 5);
+            netGraphics.strokeLineShape(new Phaser.Geom.Line(
+              topPostX - xOffset, courtTop,
+              bottomPostX - xOffset, courtBottom
+            ));
           }
           
-          // Top tape of net
+          // Side tape of net (along the posts)
           netGraphics.lineStyle(3, 0xffffff, 1);
-          netGraphics.strokeLineShape(new Phaser.Geom.Line(netPos.left, netY - netHeight, netPos.right, netY - netHeight));
+          netGraphics.strokeLineShape(new Phaser.Geom.Line(topPostX, courtTop, bottomPostX, courtBottom));
 
 
-          // Add shuttlecock shadow
-          this.shuttlecockShadow = this.add.ellipse(width - 100, courtBottom - 10, 20, 10, 0x000000, 0.3)
-            .setOrigin(0.5, 0.5);
 
           // Add shuttlecock as physics object
           this.shuttlecock = this.physics.add.image(width - 100, courtBottom - 100, 'shuttlecock')
@@ -222,12 +228,9 @@ const BadmintonGame = () => {
               this.lastLogTime = Math.floor(this.time.now / 1000);
             }
             
-            // Check boundaries with court perspective
-            const courtLeftX = this.getCourtXAtY(y).left;
-            const courtRightX = this.getCourtXAtY(y).right;
-            
-            if (x < courtLeftX || x > courtRightX || y > this.courtBottom || y < this.courtTop - 50) {
-              console.log('Boundary crossed! Position:', x, y, 'Game state:', this.gameState);
+            // Check boundaries - only game over when hitting bottom line
+            if (y > this.courtBottom) {
+              console.log('Bottom boundary crossed! Position:', x, y, 'Game state:', this.gameState);
               this.gameOver();
             }
           }
@@ -253,7 +256,7 @@ const BadmintonGame = () => {
           
           // Reset position and serve from right side
           this.shuttlecock.setPosition(courtBounds.right - 20, serveY);
-          this.shuttlecock.setVelocity(-150, 80); // Adjusted for perspective
+          this.shuttlecock.setVelocity(-250, -100); // Harder hit with upward trajectory
           this.gameState = 'playing';
         }
 
