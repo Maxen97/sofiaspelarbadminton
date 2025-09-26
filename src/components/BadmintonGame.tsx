@@ -49,7 +49,7 @@ const BadmintonGame = () => {
         private swipeTrail: Phaser.GameObjects.Graphics | null = null;
 
         // Air resistance for realistic shuttlecock physics
-        private airResistanceCoefficient: number = 0.004;
+        private airResistanceCoefficient: number = 0.025;
         
         constructor() {
           super({ key: 'BadmintonScene' });
@@ -371,7 +371,18 @@ const BadmintonGame = () => {
           
           // Reset position and serve from right side
           this.shuttlecock.setPosition(courtBounds.right - 20, serveY);
-          this.shuttlecock.setVelocity(-250, -100); // Harder hit with upward trajectory
+
+          // Add randomness to computer serve - speed and angle variation
+          const baseHorizontalSpeed = -750; // Increased from -600
+          const baseVerticalSpeed = -220; // Increased from -200
+
+          const speedVariation = 0.3; // 30% variation
+          const angleVariation = 0.4; // 40% angle variation
+
+          const randomHorizontalSpeed = baseHorizontalSpeed * (1 + (Math.random() - 0.5) * speedVariation);
+          const randomVerticalSpeed = baseVerticalSpeed * (1 + (Math.random() - 0.5) * angleVariation);
+
+          this.shuttlecock.setVelocity(randomHorizontalSpeed, randomVerticalSpeed);
           this.gameState = 'playing';
         }
 
@@ -388,7 +399,7 @@ const BadmintonGame = () => {
           const swipeSpeed = swipeMagnitude / (swipeDuration / 1000);
 
           // Dynamic speed multiplier based on swipe speed and force
-          const baseMultiplier = 2.0;
+          const baseMultiplier = 8.0; // Decreased from 10.0 for slightly lower player velocity
           const speedBonus = Math.min(swipeSpeed / 500, 1.0); // 0-1 based on swipe speed
           const totalMultiplier = baseMultiplier * (1 + speedBonus);
 
@@ -397,8 +408,8 @@ const BadmintonGame = () => {
           let verticalVelocity = swipeVector.y * totalMultiplier;
 
           // Gentle clamping to prevent extreme velocities while allowing full shot range
-          horizontalVelocity = Math.max(100, Math.min(400, horizontalVelocity));
-          verticalVelocity = Math.max(-300, Math.min(300, verticalVelocity)); // Allows smashes (positive) and lobs (negative)
+          horizontalVelocity = Math.max(300, Math.min(1200, horizontalVelocity)); // Increased max from 800 to 1200
+          verticalVelocity = Math.max(-1100, Math.min(1100, verticalVelocity)); // Increased range for extremely high initial velocity
 
           console.log('Direct swipe physics - horizontal:', horizontalVelocity, 'vertical:', verticalVelocity, 'magnitude:', swipeMagnitude.toFixed(1), 'speed:', swipeSpeed.toFixed(1), 'multiplier:', totalMultiplier.toFixed(2));
           this.shuttlecock.setVelocity(horizontalVelocity, verticalVelocity);
@@ -463,7 +474,7 @@ const BadmintonGame = () => {
         physics: {
           default: 'arcade',
           arcade: {
-            gravity: { x: 0, y: 100 },
+            gravity: { x: 0, y: 140 },
             debug: false
           }
         },
