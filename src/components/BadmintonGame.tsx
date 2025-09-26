@@ -41,6 +41,12 @@ const BadmintonGame = () => {
         private courtNearWidth!: number;
         private courtFarWidth!: number;
         private courtCenterX!: number;
+
+        // Swipe tracking variables
+        private swipeStartPos: { x: number; y: number } | null = null;
+        private swipeStartTime: number = 0;
+        private isSwipingActive: boolean = false;
+        private swipeTrail: Phaser.GameObjects.Graphics | null = null;
         
         constructor() {
           super({ key: 'BadmintonScene' });
@@ -194,17 +200,14 @@ const BadmintonGame = () => {
           // Start initial serve from right side
           this.serveShuttlecock();
 
-          // Touch/click controls with debug logging
-          this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            console.log('Click detected at:', pointer.x, pointer.y, 'Game state:', this.gameState);
-            this.hitShuttlecock();
-          });
+          // Swipe controls
+          this.setupSwipeHandlers();
 
           // Manual boundary checking using update loop
           // This will check boundaries every frame
 
           // Instructions
-          this.add.text(width / 2, 50, 'Tap to return the shuttlecock!', {
+          this.add.text(width / 2, 50, 'Swipe left to right to return the shuttlecock!', {
             fontSize: '16px',
             color: '#ffffff',
           }).setOrigin(0.5);
@@ -235,7 +238,89 @@ const BadmintonGame = () => {
             }
           }
         }
-        
+
+        setupSwipeHandlers() {
+          // Remove any existing handlers
+          this.input.removeAllListeners();
+
+          // Swipe start
+          this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            if (this.gameState !== 'playing') return;
+
+            // Only allow swipes starting from the left side (player side)
+            if (pointer.x > this.scale.width / 2) return;
+
+            this.swipeStartPos = { x: pointer.x, y: pointer.y };
+            this.swipeStartTime = this.time.now;
+            this.isSwipingActive = true;
+
+            // Create swipe trail graphics
+            this.swipeTrail = this.add.graphics();
+            this.swipeTrail.lineStyle(3, 0xffff00, 0.7);
+
+            console.log('Swipe started at:', pointer.x, pointer.y);
+          });
+
+          // Swipe move - update trail
+          this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+            if (!this.isSwipingActive || !this.swipeStartPos || !this.swipeTrail) return;
+
+            // Clear and redraw trail
+            this.swipeTrail.clear();
+            this.swipeTrail.lineStyle(3, 0xffff00, 0.7);
+            this.swipeTrail.strokeLineShape(
+              new Phaser.Geom.Line(
+                this.swipeStartPos.x, this.swipeStartPos.y,
+                pointer.x, pointer.y
+              )
+            );
+          });
+
+          // Swipe end - calculate and apply hit
+          this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+            if (!this.isSwipingActive || !this.swipeStartPos) return;
+
+            const swipeEndPos = { x: pointer.x, y: pointer.y };
+            const swipeVector = {
+              x: swipeEndPos.x - this.swipeStartPos.x,
+              y: swipeEndPos.y - this.swipeStartPos.y
+            };
+            const swipeDuration = this.time.now - this.swipeStartTime;
+            const swipeDistance = Math.sqrt(swipeVector.x * swipeVector.x + swipeVector.y * swipeVector.y);
+
+            console.log('Swipe ended:', swipeVector, 'Distance:', swipeDistance, 'Duration:', swipeDuration);
+
+            // Validate swipe
+            const isValidSwipe =
+              swipeVector.x > 0 &&        // Must be left to right
+              swipeDistance > 30 &&       // Minimum distance
+              swipeDuration < 1000 &&     // Maximum duration
+              this.shuttlecock.x < this.scale.width / 2; // Shuttlecock must be on player side
+
+            if (isValidSwipe) {
+              console.log('Valid swipe detected, hitting shuttlecock');
+              this.hitShuttlecockWithSwipe(swipeVector, swipeDuration);
+            } else {
+              console.log('Invalid swipe:', { leftToRight: swipeVector.x > 0, distance: swipeDistance, duration: swipeDuration, shuttlecockSide: this.shuttlecock.x < this.scale.width / 2 });
+            }
+
+            // Reset swipe state
+            this.resetSwipeState();
+          });
+        }
+
+        resetSwipeState() {
+          this.isSwipingActive = false;
+          this.swipeStartPos = null;
+          this.swipeStartTime = 0;
+
+          // Clean up trail
+          if (this.swipeTrail) {
+            this.swipeTrail.destroy();
+            this.swipeTrail = null;
+          }
+        }
+
         getCourtXAtY(y: number) {
           const t = Math.max(0, Math.min(1, (y - this.courtBottom) / (this.courtTop - this.courtBottom)));
           const nearLeft = this.courtCenterX - this.courtNearWidth / 2;
@@ -260,21 +345,48 @@ const BadmintonGame = () => {
           this.gameState = 'playing';
         }
 
-        hitShuttlecock() {
-          console.log('hitShuttlecock called, gameState:', this.gameState, 'shuttlecock x:', this.shuttlecock.x);
-          
+        hitShuttlecockWithSwipe(swipeVector: { x: number; y: number }, swipeDuration: number) {
+          console.log('hitShuttlecockWithSwipe called, swipeVector:', swipeVector, 'duration:', swipeDuration);
+
           if (this.gameState !== 'playing') {
             console.log('Game not in playing state');
             return;
           }
-          
-          // Temporarily remove distance check for debugging
-          // if (this.shuttlecock.x > 200) return; // Too far right to hit
-          
+
+          // Calculate swipe magnitude and speed
+          const swipeMagnitude = Math.sqrt(swipeVector.x * swipeVector.x + swipeVector.y * swipeVector.y);
+          const swipeSpeed = swipeMagnitude / (swipeDuration / 1000);
+
+          // Dynamic speed multiplier based on swipe speed and force
+          const baseMultiplier = 2.0;
+          const speedBonus = Math.min(swipeSpeed / 500, 1.0); // 0-1 based on swipe speed
+          const totalMultiplier = baseMultiplier * (1 + speedBonus);
+
+          // Apply direct force in swipe direction - this enables smashes, lobs, drives, etc.
+          let horizontalVelocity = swipeVector.x * totalMultiplier;
+          let verticalVelocity = swipeVector.y * totalMultiplier;
+
+          // Gentle clamping to prevent extreme velocities while allowing full shot range
+          horizontalVelocity = Math.max(100, Math.min(400, horizontalVelocity));
+          verticalVelocity = Math.max(-300, Math.min(300, verticalVelocity)); // Allows smashes (positive) and lobs (negative)
+
+          console.log('Direct swipe physics - horizontal:', horizontalVelocity, 'vertical:', verticalVelocity, 'magnitude:', swipeMagnitude.toFixed(1), 'speed:', swipeSpeed.toFixed(1), 'multiplier:', totalMultiplier.toFixed(2));
+          this.shuttlecock.setVelocity(horizontalVelocity, verticalVelocity);
+        }
+
+        // Legacy method - kept for backward compatibility
+        hitShuttlecock() {
+          console.log('hitShuttlecock called, gameState:', this.gameState, 'shuttlecock x:', this.shuttlecock.x);
+
+          if (this.gameState !== 'playing') {
+            console.log('Game not in playing state');
+            return;
+          }
+
           // Apply random force for variety with more forward momentum
           const randomHorizontal = Phaser.Math.Between(180, 280);
           const randomVertical = Phaser.Math.Between(-180, -120);
-          
+
           console.log('Applying velocity:', randomHorizontal, randomVertical);
           this.shuttlecock.setVelocity(randomHorizontal, randomVertical);
         }
@@ -282,10 +394,13 @@ const BadmintonGame = () => {
         gameOver() {
           console.log('Game over triggered');
           this.gameState = 'missed';
-          
+
+          // Reset any active swipe state
+          this.resetSwipeState();
+
           // Stop shuttlecock movement
           this.shuttlecock.setVelocity(0, 0);
-          
+
           // Show game over message
           const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Missed! Tap to restart', {
             fontSize: '24px',
@@ -293,21 +408,18 @@ const BadmintonGame = () => {
             backgroundColor: '#000000',
             padding: { x: 20, y: 10 }
           }).setOrigin(0.5);
-          
-          // Remove existing click listeners to prevent conflicts
-          this.input.removeAllListeners('pointerdown');
-          
-          // Restart on next click
+
+          // Remove existing listeners to prevent conflicts
+          this.input.removeAllListeners();
+
+          // Restart on next tap (simple tap for restart)
           this.input.once('pointerdown', () => {
-            console.log('Restart clicked');
+            console.log('Restart tapped');
             gameOverText.destroy();
             this.serveShuttlecock();
-            
-            // Re-add game click listener
-            this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-              console.log('Click detected at:', pointer.x, pointer.y, 'Game state:', this.gameState);
-              this.hitShuttlecock();
-            });
+
+            // Re-initialize swipe handlers for gameplay
+            this.setupSwipeHandlers();
           });
         }
       }
