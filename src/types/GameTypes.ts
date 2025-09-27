@@ -38,3 +38,18 @@ export interface ShotConfig {
   probability: number;
   name: ShotType;
 }
+
+export interface PlayerCharacterConfig {
+  bodyWidth: number;
+  bodyHeight: number;
+  armWidth: number;
+  armHeight: number;
+  bodyColor: number;
+  armColor: number;
+}
+
+export interface ArmState {
+  isSwinging: boolean;
+  restAngle: number;
+  swingAngle: number;
+}

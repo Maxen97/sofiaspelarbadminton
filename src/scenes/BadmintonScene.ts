@@ -2,6 +2,7 @@ import { GameState, GameScore } from '../types/GameTypes';
 import { CourtRenderer } from '../components/CourtRenderer';
 import { SwipeHandler } from '../components/SwipeHandler';
 import { ComputerAI } from '../components/ComputerAI';
+import { PlayerCharacter } from '../components/PlayerCharacter';
 import { GamePhysics } from '../utils/GamePhysics';
 
 export class BadmintonScene extends Phaser.Scene {
@@ -15,6 +16,7 @@ export class BadmintonScene extends Phaser.Scene {
   private courtRenderer!: CourtRenderer;
   private swipeHandler!: SwipeHandler;
   private computerAI!: ComputerAI;
+  private playerCharacter!: PlayerCharacter;
 
   constructor() {
     super({ key: 'BadmintonScene' });
@@ -23,6 +25,8 @@ export class BadmintonScene extends Phaser.Scene {
   preload() {
     this.courtRenderer = new CourtRenderer(this);
     this.courtRenderer.createTextures();
+    this.load.image('playerBody', '/sprites/body_male.png');
+    this.load.image('playerArm', '/sprites/arm.png');
   }
 
   create() {
@@ -34,6 +38,9 @@ export class BadmintonScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5);
 
     this.computerAI = new ComputerAI(this);
+
+    this.playerCharacter = new PlayerCharacter(this, this.courtRenderer);
+    this.playerCharacter.create(this.courtRenderer.getDimensions());
 
     this.swipeHandler = new SwipeHandler(
       this,
@@ -76,6 +83,8 @@ export class BadmintonScene extends Phaser.Scene {
       if (computerHit) {
         this.lastHitter = 'computer';
       }
+
+      this.playerCharacter.update(courtDimensions);
 
       const boundaryBuffer = 50;
       if (x < -boundaryBuffer || x > width + boundaryBuffer || y < -boundaryBuffer) {
@@ -124,6 +133,8 @@ export class BadmintonScene extends Phaser.Scene {
     console.log('Direct swipe physics - horizontal:', velocity.x, 'vertical:', velocity.y);
     this.shuttlecock.setVelocity(velocity.x, velocity.y);
     this.lastHitter = 'player';
+
+    this.playerCharacter.playSwingAnimation();
   }
 
   private gameOver() {
