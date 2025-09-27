@@ -42,7 +42,25 @@ export class GamePhysics {
 
     const baseMultiplier = 8.0;
     const speedBonus = Math.min(swipeSpeed / 500, 1.0);
-    const totalMultiplier = baseMultiplier * (1 + speedBonus);
+    let totalMultiplier = baseMultiplier * (1 + speedBonus);
+
+    // Calculate swipe angle (0 degrees = right, 90 degrees = up, -90 degrees = down)
+    const angleRadians = Math.atan2(-swipeVector.y, swipeVector.x);
+    const angleDegrees = angleRadians * (180 / Math.PI);
+
+    // Normalize angle to 0-360 range
+    const normalizedAngle = angleDegrees < 0 ? angleDegrees + 360 : angleDegrees;
+
+    // Check if angle is between 0-90 degrees (upward shots)
+    const isUpwardShot = normalizedAngle >= 0 && normalizedAngle <= 90;
+
+    // Reduce velocity for upward shots to make them more challenging
+    if (isUpwardShot) {
+      totalMultiplier *= 0.2;
+      console.log(`Upward shot detected (${normalizedAngle.toFixed(1)}°) - velocity reduced by factor 5`);
+    } else {
+      console.log(`Shot angle: ${normalizedAngle.toFixed(1)}° - normal velocity`);
+    }
 
     let horizontalVelocity = swipeVector.x * totalMultiplier;
     let verticalVelocity = swipeVector.y * totalMultiplier;
