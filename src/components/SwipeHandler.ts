@@ -50,7 +50,7 @@ export class SwipeHandler {
     this.swipeData.isActive = true;
 
     this.swipeData.trail = this.scene.add.graphics();
-    this.swipeData.trail.lineStyle(3, 0xffff00, 0.7);
+    this.swipeData.trail.lineStyle(8, 0xffffff, 0.6);
 
     console.log('Swipe started at:', pointer.x, pointer.y);
   }
@@ -59,7 +59,7 @@ export class SwipeHandler {
     if (!this.swipeData.isActive || !this.swipeData.trail) return;
 
     this.swipeData.trail.clear();
-    this.swipeData.trail.lineStyle(3, 0xffff00, 0.7);
+    this.swipeData.trail.lineStyle(8, 0xffffff, 0.6);
     this.swipeData.trail.strokeLineShape(
       new Phaser.Geom.Line(
         this.swipeData.startPos.x, this.swipeData.startPos.y,
