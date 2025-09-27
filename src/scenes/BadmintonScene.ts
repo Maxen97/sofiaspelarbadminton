@@ -3,6 +3,7 @@ import { CourtRenderer } from '../components/CourtRenderer';
 import { SwipeHandler } from '../components/SwipeHandler';
 import { ComputerAI } from '../components/ComputerAI';
 import { PlayerCharacter } from '../components/PlayerCharacter';
+import { ComputerCharacter } from '../components/ComputerCharacter';
 import { GamePhysics } from '../utils/GamePhysics';
 
 export class BadmintonScene extends Phaser.Scene {
@@ -19,6 +20,7 @@ export class BadmintonScene extends Phaser.Scene {
   private swipeHandler!: SwipeHandler;
   private computerAI!: ComputerAI;
   private playerCharacter!: PlayerCharacter;
+  private computerCharacter!: ComputerCharacter;
 
   constructor() {
     super({ key: 'BadmintonScene' });
@@ -50,6 +52,9 @@ export class BadmintonScene extends Phaser.Scene {
 
     this.playerCharacter = new PlayerCharacter(this, this.courtRenderer);
     this.playerCharacter.create(this.courtRenderer.getDimensions());
+
+    this.computerCharacter = new ComputerCharacter(this, this.courtRenderer);
+    this.computerCharacter.create(this.courtRenderer.getDimensions());
 
     this.swipeHandler = new SwipeHandler(
       this,
@@ -97,9 +102,11 @@ export class BadmintonScene extends Phaser.Scene {
       const computerHit = this.computerAI.update(this.shuttlecock, width, courtDimensions.top);
       if (computerHit) {
         this.lastHitter = 'computer';
+        this.computerCharacter.playSwingAnimation();
       }
 
       this.playerCharacter.update(courtDimensions);
+      this.computerCharacter.update(courtDimensions);
 
       const boundaryBuffer = 50;
       if (x < -boundaryBuffer || x > width + boundaryBuffer || y < -boundaryBuffer) {
