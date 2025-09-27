@@ -169,16 +169,16 @@ export class BadmintonScene extends Phaser.Scene {
 
     if (this.shuttlecock.x > width / 2) {
       this.score.player++;
-      scoreMessage = 'Player scores!';
+      scoreMessage = 'Snyggt!';
     } else {
       this.score.computer++;
-      scoreMessage = 'Computer scores!';
+      scoreMessage = 'Å nej!';
     }
 
     this.playerScoreText.setText(this.score.player.toString());
     this.computerScoreText.setText(this.score.computer.toString());
 
-    const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTap to restart`, {
+    const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTryck för att fortsätta`, {
       fontSize: '24px',
       color: '#ff0000',
       backgroundColor: '#000000',
@@ -209,19 +209,19 @@ export class BadmintonScene extends Phaser.Scene {
 
     if (this.lastHitter === 'player') {
       this.score.computer++;
-      scoreMessage = 'Player hit out of bounds!\nComputer scores!';
+      scoreMessage = 'Utanför!\nMotståndare får poäng!';
     } else if (this.lastHitter === 'computer') {
       this.score.player++;
-      scoreMessage = 'Computer hit out of bounds!\nPlayer scores!';
+      scoreMessage = 'Utanför!\nPoäng till dig!';
     } else {
       this.score.computer++;
-      scoreMessage = 'Shot went out of bounds!\nComputer scores!';
+      scoreMessage = 'Utanför!\nMotståndare poängterar!';
     }
 
     this.playerScoreText.setText(this.score.player.toString());
     this.computerScoreText.setText(this.score.computer.toString());
 
-    const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTap to restart`, {
+    const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTryck för att fortsätta`, {
       fontSize: '24px',
       color: '#ff0000',
       backgroundColor: '#000000',
