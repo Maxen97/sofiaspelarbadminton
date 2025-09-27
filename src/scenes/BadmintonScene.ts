@@ -139,7 +139,8 @@ export class BadmintonScene extends Phaser.Scene {
 
     this.gameState = 'playing';
     this.computerAI.reset();
-    this.lastHitter = null;
+    this.lastHitter = 'computer';
+    this.computerCharacter.playSwingAnimation(this.shuttlecock.x);
   }
 
   private hitShuttlecockWithSwipe(swipeVector: { x: number; y: number }, swipeDuration: number) {
