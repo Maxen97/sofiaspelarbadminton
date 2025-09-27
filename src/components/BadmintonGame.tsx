@@ -39,7 +39,7 @@ const BadmintonGame = () => {
         physics: {
           default: 'arcade',
           arcade: {
-            gravity: { x: 0, y: 140 },
+            gravity: { x: 0, y: 280 },
             debug: false
           }
         },
