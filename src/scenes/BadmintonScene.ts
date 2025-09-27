@@ -91,8 +91,6 @@ export class BadmintonScene extends Phaser.Scene {
       GamePhysics.applyAirResistance(this.shuttlecock);
 
       const courtDimensions = this.courtRenderer.getDimensions();
-      const scale = GamePhysics.calculateDepthScale(y, courtDimensions.top, courtDimensions.bottom);
-      this.shuttlecock.setScale(scale);
 
       this.logPositionPeriodically(x, y, currentVelocity);
 
