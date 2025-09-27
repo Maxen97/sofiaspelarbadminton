@@ -10,6 +10,7 @@ export class BadmintonScene extends Phaser.Scene {
   private lastLogTime: number = 0;
   private score: GameScore = { player: 0, computer: 0 };
   private scoreText!: Phaser.GameObjects.Text;
+  private lastHitter: 'player' | 'computer' | null = null;
 
   private courtRenderer!: CourtRenderer;
   private swipeHandler!: SwipeHandler;
@@ -71,9 +72,16 @@ export class BadmintonScene extends Phaser.Scene {
 
       this.logPositionPeriodically(x, y, currentVelocity);
 
-      this.computerAI.update(this.shuttlecock, width);
+      const computerHit = this.computerAI.update(this.shuttlecock, width, courtDimensions.top);
+      if (computerHit) {
+        this.lastHitter = 'computer';
+      }
 
-      if (y > courtDimensions.bottom - 10) {
+      const boundaryBuffer = 50;
+      if (x < -boundaryBuffer || x > width + boundaryBuffer || y < -boundaryBuffer) {
+        console.log('Out of bounds! Position:', x, y, 'Last hitter:', this.lastHitter);
+        this.gameOverOutOfBounds();
+      } else if (y > courtDimensions.bottom - 10) {
         console.log('Bottom boundary crossed! Position:', x, y, 'Game state:', this.gameState);
         this.gameOver();
       }
@@ -100,6 +108,7 @@ export class BadmintonScene extends Phaser.Scene {
 
     this.gameState = 'playing';
     this.computerAI.reset();
+    this.lastHitter = null;
   }
 
   private hitShuttlecockWithSwipe(swipeVector: { x: number; y: number }, swipeDuration: number) {
@@ -114,6 +123,7 @@ export class BadmintonScene extends Phaser.Scene {
 
     console.log('Direct swipe physics - horizontal:', velocity.x, 'vertical:', velocity.y);
     this.shuttlecock.setVelocity(velocity.x, velocity.y);
+    this.lastHitter = 'player';
   }
 
   private gameOver() {
@@ -135,6 +145,48 @@ export class BadmintonScene extends Phaser.Scene {
     } else {
       this.score.computer++;
       scoreMessage = 'Computer scores!';
+    }
+
+    this.scoreText.setText(`Player: ${this.score.player}  Computer: ${this.score.computer}`);
+
+    const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTap to restart`, {
+      fontSize: '24px',
+      color: '#ff0000',
+      backgroundColor: '#000000',
+      padding: { x: 20, y: 10 },
+      align: 'center'
+    }).setOrigin(0.5);
+
+    this.swipeHandler.setupRestartHandler(() => {
+      console.log('Restart tapped');
+      gameOverText.destroy();
+      this.physics.resume();
+      this.serveShuttlecock();
+      this.swipeHandler.setupHandlers();
+    });
+  }
+
+  private gameOverOutOfBounds() {
+    console.log('Game over: Out of bounds! Last hitter was:', this.lastHitter);
+    this.gameState = 'missed';
+
+    this.swipeHandler.resetSwipeState();
+    this.computerAI.reset();
+
+    this.shuttlecock.setVelocity(0, 0);
+    this.physics.pause();
+
+    let scoreMessage = '';
+
+    if (this.lastHitter === 'player') {
+      this.score.computer++;
+      scoreMessage = 'Player hit out of bounds!\nComputer scores!';
+    } else if (this.lastHitter === 'computer') {
+      this.score.player++;
+      scoreMessage = 'Computer hit out of bounds!\nPlayer scores!';
+    } else {
+      this.score.computer++;
+      scoreMessage = 'Shot went out of bounds!\nComputer scores!';
     }
 
     this.scoreText.setText(`Player: ${this.score.player}  Computer: ${this.score.computer}`);

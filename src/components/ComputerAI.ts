@@ -40,11 +40,20 @@ export class ComputerAI {
     ];
   }
 
-  update(shuttlecock: Phaser.Physics.Arcade.Image, screenWidth: number): boolean {
+  update(shuttlecock: Phaser.Physics.Arcade.Image, screenWidth: number, courtTop?: number): boolean {
     const currentVelocity = shuttlecock.body.velocity;
     const x = shuttlecock.x;
+    const y = shuttlecock.y;
 
     if (x > screenWidth / 2 && !this.state.hasHit && currentVelocity.x > 0) {
+      if (courtTop !== undefined) {
+        const maxReachableHeight = courtTop - 100;
+        if (y < maxReachableHeight) {
+          console.log('Shuttlecock too high to reach! Height:', y.toFixed(1), 'Max reachable:', maxReachableHeight.toFixed(1));
+          return false;
+        }
+      }
+
       if (!this.state.hitTimer) {
         const reactionDelay = 200 + Math.random() * 200;
         this.state.hitTimer = this.scene.time.now + reactionDelay;
