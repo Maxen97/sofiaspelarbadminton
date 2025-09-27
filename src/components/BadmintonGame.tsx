@@ -55,6 +55,11 @@ const BadmintonGame = () => {
         private computerHasHit: boolean = false;
         private computerHitDelay: number = 0;
         private computerHitTimer: number = 0;
+
+        // Score tracking
+        private playerScore: number = 0;
+        private computerScore: number = 0;
+        private scoreText!: Phaser.GameObjects.Text;
         
         constructor() {
           super({ key: 'BadmintonScene' });
@@ -218,6 +223,13 @@ const BadmintonGame = () => {
           this.add.text(width / 2, 50, 'Swipe left to right to return the shuttlecock!', {
             fontSize: '16px',
             color: '#ffffff',
+          }).setOrigin(0.5);
+
+          // Score display
+          this.scoreText = this.add.text(width / 2, 20, `Player: ${this.playerScore}  Computer: ${this.computerScore}`, {
+            fontSize: '18px',
+            color: '#ffffff',
+            fontWeight: 'bold'
           }).setOrigin(0.5);
         }
 
@@ -517,12 +529,30 @@ const BadmintonGame = () => {
           this.shuttlecock.setVelocity(0, 0);
           this.physics.pause();
 
-          // Show game over message
-          const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Missed! Tap to restart', {
+          // Determine who scored based on shuttle position
+          const { width } = this.scale;
+          let scoreMessage = '';
+
+          if (this.shuttlecock.x > width / 2) {
+            // Shuttle landed on computer's side (right) - Player scores
+            this.playerScore++;
+            scoreMessage = 'Player scores!';
+          } else {
+            // Shuttle landed on player's side (left) - Computer scores
+            this.computerScore++;
+            scoreMessage = 'Computer scores!';
+          }
+
+          // Update score display
+          this.scoreText.setText(`Player: ${this.playerScore}  Computer: ${this.computerScore}`);
+
+          // Show game over message with scorer
+          const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTap to restart`, {
             fontSize: '24px',
             color: '#ff0000',
             backgroundColor: '#000000',
-            padding: { x: 20, y: 10 }
+            padding: { x: 20, y: 10 },
+            align: 'center'
           }).setOrigin(0.5);
 
           // Remove existing listeners to prevent conflicts
