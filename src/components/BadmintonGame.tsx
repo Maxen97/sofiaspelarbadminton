@@ -17,24 +17,28 @@ const BadmintonGame = () => {
   const phaserGameRef = useRef<PhaserGameRef>(null);
 
   useEffect(() => {
-    const handleOrientationChange = () => {
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-        const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-        if (phaserGameRef.current?.scene?.isActive('BadmintonScene')) {
-          if (isPortrait) {
-            phaserGameRef.current.scene.pause('BadmintonScene');
-          } else {
-            phaserGameRef.current.scene.resume('BadmintonScene');
-          }
-        }
+    const shouldInitializeGame = () => {
+      if (typeof window === 'undefined') return false;
+
+      // Always initialize on desktop/tablet (width > 768px)
+      if (window.innerWidth > 768) return true;
+
+      // On mobile, only initialize if in landscape mode
+      return !window.matchMedia('(orientation: portrait)').matches;
+    };
+
+    const destroyGame = () => {
+      if (phaserGameRef.current) {
+        phaserGameRef.current.destroy(true);
+        phaserGameRef.current = null;
       }
     };
 
-    const orientationMediaQuery = window.matchMedia('(orientation: portrait)');
-    orientationMediaQuery.addEventListener('change', handleOrientationChange);
-
     const initGame = async () => {
-      if (typeof window === 'undefined') return;
+      if (!shouldInitializeGame()) return;
+
+      // Destroy existing game if any
+      destroyGame();
 
       const Phaser = (await import('phaser')).default;
       const { BadmintonScene } = await import('../scenes/BadmintonScene');
@@ -58,22 +62,42 @@ const BadmintonGame = () => {
         }
       };
 
-      if (phaserGameRef.current) {
-        phaserGameRef.current.destroy(true);
-      }
-
       phaserGameRef.current = new Phaser.Game(config);
     };
 
+    const handleOrientationChange = () => {
+      if (shouldInitializeGame()) {
+        // Switch to landscape or desktop - initialize game
+        if (!phaserGameRef.current) {
+          initGame();
+        }
+      } else {
+        // Switch to portrait on mobile - destroy game
+        destroyGame();
+      }
+    };
+
+    const handleResize = () => {
+      // Handle window resize events
+      if (phaserGameRef.current && shouldInitializeGame()) {
+        // Reinitialize game with new dimensions
+        initGame();
+      } else if (!shouldInitializeGame()) {
+        destroyGame();
+      }
+    };
+
+    const orientationMediaQuery = window.matchMedia('(orientation: portrait)');
+    orientationMediaQuery.addEventListener('change', handleOrientationChange);
+    window.addEventListener('resize', handleResize);
+
+    // Initial game setup
     initGame();
 
     return () => {
       orientationMediaQuery.removeEventListener('change', handleOrientationChange);
-
-      if (phaserGameRef.current) {
-        phaserGameRef.current.destroy(true);
-        phaserGameRef.current = null;
-      }
+      window.removeEventListener('resize', handleResize);
+      destroyGame();
     };
   }, []);
 
