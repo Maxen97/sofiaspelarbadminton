@@ -8,13 +8,16 @@ export class ComputerCharacter {
   private body!: Phaser.GameObjects.Image;
   private arm!: Phaser.GameObjects.Image;
   private armRotationTween?: Phaser.Tweens.Tween;
+  private movementTween?: Phaser.Tweens.Tween;
 
   private readonly bodyWidth = 90;
   private readonly bodyHeight = 180;
   private readonly armWidth = 120;
   private readonly armHeight = 24;
+  private readonly maxMovement = 120;
 
   private characterY: number = 0;
+  private baseX: number = 0;
 
   constructor(scene: Phaser.Scene, courtRenderer: CourtRenderer) {
     this.scene = scene;
@@ -38,9 +41,9 @@ export class ComputerCharacter {
     const courtBounds = this.courtRenderer.getCourtXAtY(this.characterY);
 
     // Position character 80% in from left edge of court (opposite side from player)
-    const characterX = courtBounds.left + (courtBounds.right - courtBounds.left) * 0.8;
+    this.baseX = courtBounds.left + (courtBounds.right - courtBounds.left) * 0.8;
 
-    this.container = this.scene.add.container(characterX, this.characterY);
+    this.container = this.scene.add.container(this.baseX, this.characterY);
   }
 
   private createBody() {
@@ -84,9 +87,14 @@ export class ComputerCharacter {
     this.container.add(this.arm);
   }
 
-  playSwingAnimation() {
+  playSwingAnimation(shuttlecockX?: number) {
     if (this.armRotationTween) {
       this.armRotationTween.stop();
+    }
+
+    // Move towards shuttlecock if position provided
+    if (shuttlecockX !== undefined) {
+      this.moveTowardsShuttle(shuttlecockX);
     }
 
     this.armRotationTween = this.scene.tweens.add({
@@ -97,6 +105,35 @@ export class ComputerCharacter {
       yoyo: true,
       onComplete: () => {
         this.arm.setRotation(1.57 + 0.35);
+      }
+    });
+  }
+
+  private moveTowardsShuttle(shuttlecockX: number) {
+    if (this.movementTween) {
+      this.movementTween.stop();
+    }
+
+    // Calculate offset towards shuttlecock, clamped to max movement
+    const offset = Math.max(-this.maxMovement, Math.min(this.maxMovement, (shuttlecockX - this.baseX) * 0.2));
+    const targetX = this.baseX + offset;
+
+    // Move towards shuttlecock
+    this.movementTween = this.scene.tweens.add({
+      targets: this.container,
+      x: targetX,
+      duration: 250,
+      ease: 'Power2',
+      onComplete: () => {
+        // Return to base position after a short delay
+        this.scene.time.delayedCall(400, () => {
+          this.scene.tweens.add({
+            targets: this.container,
+            x: this.baseX,
+            duration: 300,
+            ease: 'Power2'
+          });
+        });
       }
     });
   }
@@ -114,6 +151,9 @@ export class ComputerCharacter {
   destroy() {
     if (this.armRotationTween) {
       this.armRotationTween.stop();
+    }
+    if (this.movementTween) {
+      this.movementTween.stop();
     }
     this.container?.destroy();
   }

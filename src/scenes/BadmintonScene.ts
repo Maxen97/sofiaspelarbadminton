@@ -102,7 +102,7 @@ export class BadmintonScene extends Phaser.Scene {
       const computerHit = this.computerAI.update(this.shuttlecock, width, courtDimensions.top);
       if (computerHit) {
         this.lastHitter = 'computer';
-        this.computerCharacter.playSwingAnimation();
+        this.computerCharacter.playSwingAnimation(this.shuttlecock.x);
       }
 
       this.playerCharacter.update(courtDimensions);
@@ -156,7 +156,7 @@ export class BadmintonScene extends Phaser.Scene {
     this.shuttlecock.setVelocity(velocity.x, velocity.y);
     this.lastHitter = 'player';
 
-    this.playerCharacter.playSwingAnimation();
+    this.playerCharacter.playSwingAnimation(this.shuttlecock.x);
   }
 
   private gameOver() {
