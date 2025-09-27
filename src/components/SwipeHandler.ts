@@ -45,8 +45,6 @@ export class SwipeHandler {
   private handleSwipeStart(pointer: Phaser.Input.Pointer) {
     if (!this.isGamePlaying()) return;
 
-    if (pointer.x > this.scene.scale.width / 2) return;
-
     this.swipeData.startPos = { x: pointer.x, y: pointer.y };
     this.swipeData.startTime = this.scene.time.now;
     this.swipeData.isActive = true;

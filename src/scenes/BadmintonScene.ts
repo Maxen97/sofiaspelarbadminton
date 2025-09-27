@@ -55,7 +55,7 @@ export class BadmintonScene extends Phaser.Scene {
       this,
       (swipeVector, duration) => this.hitShuttlecockWithSwipe(swipeVector, duration),
       () => this.gameState === 'playing',
-      () => this.shuttlecock.x < this.scale.width / 2
+      () => this.shuttlecock.x < this.scale.width / 2 + 20
     );
 
     this.serveShuttlecock();
