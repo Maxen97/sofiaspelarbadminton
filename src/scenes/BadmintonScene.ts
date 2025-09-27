@@ -10,7 +10,9 @@ export class BadmintonScene extends Phaser.Scene {
   private gameState: GameState = 'playing';
   private lastLogTime: number = 0;
   private score: GameScore = { player: 0, computer: 0 };
-  private scoreText!: Phaser.GameObjects.Text;
+  private banner!: Phaser.GameObjects.Image;
+  private playerScoreText!: Phaser.GameObjects.Text;
+  private computerScoreText!: Phaser.GameObjects.Text;
   private lastHitter: 'player' | 'computer' | null = null;
 
   private courtRenderer!: CourtRenderer;
@@ -27,6 +29,7 @@ export class BadmintonScene extends Phaser.Scene {
     this.courtRenderer.createTextures();
     this.load.image('playerBody', '/sprites/body_male.png');
     this.load.image('playerArm', '/sprites/arm.png');
+    this.load.image('banner', '/sprites/banner.png');
   }
 
   create() {
@@ -52,15 +55,23 @@ export class BadmintonScene extends Phaser.Scene {
     this.serveShuttlecock();
     this.swipeHandler.setupHandlers();
 
-    this.add.text(width / 2, 50, 'Swipe left to right to return the shuttlecock!', {
-      fontSize: '16px',
+    const bannerHeight = 80;
+    const bannerScale = bannerHeight / this.textures.get('banner').getSourceImage().height;
+
+    this.banner = this.add.image(width / 2, 0, 'banner')
+      .setOrigin(0.5, 0)
+      .setScale(bannerScale);
+
+    this.playerScoreText = this.add.text(width * 0.4, bannerHeight / 2, this.score.player.toString(), {
+      fontSize: '28px',
       color: '#ffffff',
+      fontWeight: '900'
     }).setOrigin(0.5);
 
-    this.scoreText = this.add.text(width / 2, 20, `Player: ${this.score.player}  Computer: ${this.score.computer}`, {
-      fontSize: '18px',
+    this.computerScoreText = this.add.text(width * 0.6, bannerHeight / 2, this.score.computer.toString(), {
+      fontSize: '28px',
       color: '#ffffff',
-      fontWeight: 'bold'
+      fontWeight: '900'
     }).setOrigin(0.5);
   }
 
@@ -158,7 +169,8 @@ export class BadmintonScene extends Phaser.Scene {
       scoreMessage = 'Computer scores!';
     }
 
-    this.scoreText.setText(`Player: ${this.score.player}  Computer: ${this.score.computer}`);
+    this.playerScoreText.setText(this.score.player.toString());
+    this.computerScoreText.setText(this.score.computer.toString());
 
     const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTap to restart`, {
       fontSize: '24px',
@@ -200,7 +212,8 @@ export class BadmintonScene extends Phaser.Scene {
       scoreMessage = 'Shot went out of bounds!\nComputer scores!';
     }
 
-    this.scoreText.setText(`Player: ${this.score.player}  Computer: ${this.score.computer}`);
+    this.playerScoreText.setText(this.score.player.toString());
+    this.computerScoreText.setText(this.score.computer.toString());
 
     const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTap to restart`, {
       fontSize: '24px',
