@@ -59,13 +59,13 @@ export class PlayerCharacter {
     this.arm = this.scene.add.image(0, 0, 'playerArm');
 
     // Position arm at shoulder: right side of sprite, about 1/4 down from top
-    const shoulderX = this.bodyWidth / 2 * 0.8 - 20; // Slightly inward from edge, moved 20px left total (moved 20px more right)
-    const shoulderY = -this.bodyHeight * 0.75 + 20; // 75% up from bottom, moved 20px down total
+    const shoulderX = this.bodyWidth / 2 * 0.8 - 80; // Slightly inward from edge, moved 20px left total (moved 20px more right)
+    const shoulderY = -this.bodyHeight * 0.75 - 15; // 75% up from bottom, moved 20px down total
 
     this.arm.setPosition(shoulderX, shoulderY);
 
     // Set origin at shoulder joint (left end of arm where it connects to body)
-    this.arm.setOrigin(0, 0.5);
+    this.arm.setOrigin(0.5, 0);
 
     // Scale arm to match character proportions
     const armScale = this.armWidth / this.arm.width;
