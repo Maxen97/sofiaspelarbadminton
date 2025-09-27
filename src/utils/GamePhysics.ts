@@ -1,21 +1,29 @@
 export class GamePhysics {
-  private static readonly AIR_RESISTANCE_COEFFICIENT = 0.05;
+  private static readonly AIR_RESISTANCE_COEFFICIENT = 0.025;
   private static readonly MIN_SPEED_FOR_DRAG = 10;
 
   static applyAirResistance(shuttlecock: Phaser.Physics.Arcade.Image): void {
     const currentVelocity = shuttlecock.body.velocity;
-    const horizontalSpeed = Math.abs(currentVelocity.x);
+    const speed = Math.sqrt(currentVelocity.x * currentVelocity.x + currentVelocity.y * currentVelocity.y);
 
-    if (horizontalSpeed > this.MIN_SPEED_FOR_DRAG) {
-      const dragMagnitude = this.AIR_RESISTANCE_COEFFICIENT * horizontalSpeed;
-      const dragX = -(currentVelocity.x / horizontalSpeed) * dragMagnitude;
+    if (speed > this.MIN_SPEED_FOR_DRAG) {
+      const dragMagnitude = this.AIR_RESISTANCE_COEFFICIENT * speed;
+      const dragX = -(currentVelocity.x / speed) * dragMagnitude;
+      const dragY = -(currentVelocity.y / speed) * dragMagnitude;
 
       const newVelX = currentVelocity.x + dragX;
+      const newVelY = currentVelocity.y + dragY;
 
       if (Math.sign(newVelX) === Math.sign(currentVelocity.x) || Math.abs(newVelX) > Math.abs(currentVelocity.x)) {
         shuttlecock.setVelocityX(newVelX);
       } else {
         shuttlecock.setVelocityX(0);
+      }
+
+      if (Math.sign(newVelY) === Math.sign(currentVelocity.y) || Math.abs(newVelY) > Math.abs(currentVelocity.y)) {
+        shuttlecock.setVelocityY(newVelY);
+      } else {
+        shuttlecock.setVelocityY(0);
       }
     }
   }
@@ -39,15 +47,15 @@ export class GamePhysics {
     let horizontalVelocity = swipeVector.x * totalMultiplier;
     let verticalVelocity = swipeVector.y * totalMultiplier;
 
-    horizontalVelocity = Math.max(600, Math.min(2400, horizontalVelocity));
-    verticalVelocity = Math.max(-2200, Math.min(2200, verticalVelocity));
+    horizontalVelocity = Math.max(300, Math.min(1200, horizontalVelocity));
+    verticalVelocity = Math.max(-1100, Math.min(1100, verticalVelocity));
 
     return { x: horizontalVelocity, y: verticalVelocity };
   }
 
   static generateServeVelocity(): { x: number; y: number } {
-    const baseHorizontalSpeed = -1500;
-    const baseVerticalSpeed = -440;
+    const baseHorizontalSpeed = -750;
+    const baseVerticalSpeed = -220;
 
     const speedVariation = 0.3;
     const angleVariation = 0.4;
