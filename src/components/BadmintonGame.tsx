@@ -3,9 +3,18 @@
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 
+type PhaserGameRef = {
+  scene: {
+    isActive: (sceneName: string) => boolean;
+    pause: (sceneName: string) => void;
+    resume: (sceneName: string) => void;
+  };
+  destroy: (removeCanvas: boolean, noReturn?: boolean) => void;
+} | null;
+
 const BadmintonGame = () => {
   const gameRef = useRef<HTMLDivElement>(null);
-  const phaserGameRef = useRef<any>(null);
+  const phaserGameRef = useRef<PhaserGameRef>(null);
 
   useEffect(() => {
     const handleOrientationChange = () => {

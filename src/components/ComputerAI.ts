@@ -41,6 +41,10 @@ export class ComputerAI {
   }
 
   update(shuttlecock: Phaser.Physics.Arcade.Image, screenWidth: number, courtTop?: number): boolean {
+    if (!shuttlecock.body) {
+      return false;
+    }
+
     const currentVelocity = shuttlecock.body.velocity;
     const x = shuttlecock.x;
     const y = shuttlecock.y;

@@ -2,7 +2,7 @@ import { CourtDimensions, CourtBounds } from '../types/GameTypes';
 
 export class CourtRenderer {
   private scene: Phaser.Scene;
-  private dimensions: CourtDimensions;
+  private dimensions!: CourtDimensions;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;

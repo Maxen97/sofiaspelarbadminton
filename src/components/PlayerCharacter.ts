@@ -1,8 +1,9 @@
-import { CourtDimensions, CourtBounds } from '../types/GameTypes';
+import { CourtDimensions } from '../types/GameTypes';
+import { CourtRenderer } from './CourtRenderer';
 
 export class PlayerCharacter {
   private scene: Phaser.Scene;
-  private courtRenderer: any;
+  private courtRenderer: CourtRenderer;
   private container!: Phaser.GameObjects.Container;
   private body!: Phaser.GameObjects.Image;
   private arm!: Phaser.GameObjects.Image;
@@ -15,7 +16,7 @@ export class PlayerCharacter {
 
   private characterY: number = 0;
 
-  constructor(scene: Phaser.Scene, courtRenderer: any) {
+  constructor(scene: Phaser.Scene, courtRenderer: CourtRenderer) {
     this.scene = scene;
     this.courtRenderer = courtRenderer;
   }

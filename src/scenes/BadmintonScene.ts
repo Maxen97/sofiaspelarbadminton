@@ -65,18 +65,18 @@ export class BadmintonScene extends Phaser.Scene {
     this.playerScoreText = this.add.text(width * 0.4, bannerHeight / 2, this.score.player.toString(), {
       fontSize: '28px',
       color: '#ffffff',
-      fontWeight: '900'
+      fontStyle: 'bold'
     }).setOrigin(0.5);
 
     this.computerScoreText = this.add.text(width * 0.6, bannerHeight / 2, this.score.computer.toString(), {
       fontSize: '28px',
       color: '#ffffff',
-      fontWeight: '900'
+      fontStyle: 'bold'
     }).setOrigin(0.5);
   }
 
   update() {
-    if (this.gameState === 'playing' && this.shuttlecock) {
+    if (this.gameState === 'playing' && this.shuttlecock && this.shuttlecock.body) {
       const { width } = this.scale;
       const x = this.shuttlecock.x;
       const y = this.shuttlecock.y;
@@ -108,7 +108,7 @@ export class BadmintonScene extends Phaser.Scene {
     }
   }
 
-  private logPositionPeriodically(x: number, y: number, velocity: any) {
+  private logPositionPeriodically(x: number, y: number, velocity: Phaser.Math.Vector2) {
     const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
     if (Math.floor(this.time.now / 1000) !== this.lastLogTime) {
       console.log('Shuttlecock - pos:', x.toFixed(1), y.toFixed(1), 'vel:', velocity.x.toFixed(1), velocity.y.toFixed(1), 'speed:', speed.toFixed(1));

@@ -3,6 +3,10 @@ export class GamePhysics {
   private static readonly MIN_SPEED_FOR_DRAG = 10;
 
   static applyAirResistance(shuttlecock: Phaser.Physics.Arcade.Image): void {
+    if (!shuttlecock.body) {
+      return;
+    }
+
     const currentVelocity = shuttlecock.body.velocity;
     const speed = Math.sqrt(currentVelocity.x * currentVelocity.x + currentVelocity.y * currentVelocity.y);
 
