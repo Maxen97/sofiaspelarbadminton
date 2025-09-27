@@ -30,10 +30,16 @@ export class BadmintonScene extends Phaser.Scene {
     this.load.image('playerBody', '/sprites/body_male.png');
     this.load.image('playerArm', '/sprites/arm.png');
     this.load.image('banner', '/sprites/banner.png');
+    this.load.image('arena', '/sprites/arena.png');
   }
 
   create() {
     const { width, height } = this.scale;
+
+    // Add arena background image
+    this.add.image(width / 2, height / 2, 'arena')
+      .setOrigin(0.5, 0.5)
+      .setDisplaySize(width, height);
 
     this.courtRenderer.renderCourt();
 

@@ -44,7 +44,6 @@ const BadmintonGame = () => {
         width: window.innerWidth,
         height: window.innerHeight,
         parent: gameRef.current!,
-        backgroundColor: '#87CEEB',
         physics: {
           default: 'arcade',
           arcade: {
