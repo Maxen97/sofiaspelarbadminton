@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { Character, CHARACTER_OPTIONS, CharacterSelection as CharacterSelectionType } from '@/utils/characterOptions';
 
 interface CharacterSelectProps {
@@ -51,7 +52,7 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full aspect-square p-2 bg-white border-2 rounded-lg shadow-sm transition-all duration-200 ${
           selectedCharacter ? colors.button : 'border-gray-300 hover:border-gray-400'
-        } ${colors.buttonHover} focus:outline-none focus:ring-2 focus:ring-white/50 relative`}
+        } ${colors.buttonHover} focus:outline-none relative`}
       >
         {selectedCharacter ? (
           <div className="flex flex-col items-center justify-center h-full">
@@ -70,21 +71,11 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
             <span className="text-gray-500 text-xs text-center leading-tight">{placeholder}</span>
           </div>
         )}
-        <svg
-          className={`absolute top-2 right-2 w-4 h-4 text-gray-400 transition-transform duration-200 ${
-            isOpen ? 'transform rotate-180' : ''
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
       </button>
 
       {isOpen && (
-        <div className={`absolute z-10 w-64 left-1/2 transform -translate-x-1/2 mt-1 bg-white border-2 ${colors.dropdown} rounded-lg shadow-lg p-2`}>
-          <div className="grid grid-cols-3 gap-1">
+        <div className={`absolute z-30 w-80 top-0 left-1/2 transform -translate-x-1/2 bg-white border-2 ${colors.dropdown} rounded-lg shadow-xl p-3 transition-all duration-200 animate-in fade-in-0 zoom-in-95`}>
+          <div className="grid grid-cols-3 gap-2">
             {CHARACTER_OPTIONS.map((character) => (
               <button
                 key={character.id}
@@ -93,7 +84,7 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
                   onSelect(character);
                   setIsOpen(false);
                 }}
-                className={`aspect-square p-1 rounded-lg transition-colors duration-150 border-2 ${
+                className={`aspect-square p-2 rounded-lg transition-colors duration-150 border-2 ${
                   selectedCharacter?.id === character.id
                     ? `${colors.optionSelected} ${colors.button.split(' ')[0]}`
                     : `${colors.option} border-transparent hover:border-gray-200`
@@ -103,9 +94,9 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
                   <img
                     src={character.spriteBodyUrl}
                     alt={character.displayName}
-                    className="w-8 h-8 object-contain mb-0.5"
+                    className="w-12 h-12 object-contain mb-1"
                   />
-                  <span className="font-medium text-gray-900 text-[10px] text-center leading-tight">{character.displayName}</span>
+                  <span className="font-medium text-gray-900 text-xs text-center leading-tight">{character.displayName}</span>
                 </div>
               </button>
             ))}
@@ -148,9 +139,19 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
 
   return (
     <div className="h-screen bg-gradient-to-b from-blue-400 to-green-400 p-4 flex flex-col overflow-hidden">
+      {/* Back Arrow */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 z-40 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors duration-200"
+      >
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </Link>
+
       <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-4">
         <h1 className="text-2xl md:text-3xl font-bold text-white text-center">
-          Choose Your Characters
+          Välj Spelare
         </h1>
 
         {/* Character Selection Grid */}
@@ -158,7 +159,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
           {/* Player Selection */}
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-white text-center">
-              Your Character
+              Du
             </h2>
             <CharacterSelect
               placeholder="Select your character"
@@ -171,7 +172,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
           {/* Computer Selection */}
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-white text-center">
-              Computer Character
+              Motståndare
             </h2>
             <CharacterSelect
               placeholder="Select computer character"
