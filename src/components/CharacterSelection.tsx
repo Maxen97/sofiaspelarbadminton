@@ -47,7 +47,7 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
   const colors = accentColors[accentColor];
 
   return (
-    <div className="relative w-full max-w-[10rem] mx-auto" ref={dropdownRef}>
+    <div className="relative w-full max-w-[10rem] landscape:max-w-[8rem] mx-auto" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -139,7 +139,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
   const canStartGame = playerCharacter && computerCharacter;
 
   return (
-    <div className="h-screen bg-gradient-to-b from-background to-background/95 p-4 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-b from-background to-background/95 p-4 flex flex-col overflow-y-auto">
       {/* Back Arrow */}
       <Link
         href="/"
@@ -157,19 +157,19 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
           alt="Sofia Spelar Badminton Logo"
           width={90}
           height={90}
-          className="rounded-lg"
+          className="rounded-lg landscape:w-[60px] landscape:h-[60px]"
         />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-12 md:space-y-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground text-center">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-12 landscape:space-y-4 md:space-y-4">
+        <h1 className="text-2xl landscape:text-xl md:text-3xl font-bold text-foreground text-center">
           Välj Spelare
         </h1>
 
         {/* Character Selection Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-6 w-full max-w-xl">
+        <div className="grid grid-cols-1 landscape:grid-cols-2 md:grid-cols-2 gap-12 landscape:gap-6 md:gap-6 w-full max-w-xl">
           {/* Player Selection */}
-          <div className="space-y-3 md:space-y-2">
+          <div className="space-y-3 landscape:space-y-2 md:space-y-2">
             <h2 className="text-lg font-semibold text-foreground text-center">
               Du
             </h2>
@@ -182,7 +182,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
           </div>
 
           {/* Computer Selection */}
-          <div className="space-y-6 md:space-y-2">
+          <div className="space-y-6 landscape:space-y-2 md:space-y-2">
             <h2 className="text-lg font-semibold text-foreground text-center">
               Motståndare
             </h2>
