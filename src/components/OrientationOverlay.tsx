@@ -4,12 +4,17 @@ export default function OrientationOverlay() {
   return (
     <div className="orientation-overlay">
       <div className="orientation-content">
-        <div className="phone-icon">📱</div>
+        <div className="phone-transition">
+          <div className="phone portrait">
+            <div className="phone-screen"></div>
+          </div>
+          <div className="arrow">→</div>
+          <div className="phone landscape">
+            <div className="phone-screen"></div>
+          </div>
+        </div>
         <h2>Vänd din telefon</h2>
         <p>Spelet fungerar bäst i liggande läge</p>
-        <div className="rotation-hint">
-          <span className="arrow">↻</span>
-        </div>
       </div>
       
       <style jsx>{`
@@ -30,14 +35,48 @@ export default function OrientationOverlay() {
 
         .orientation-content {
           padding: 2rem;
-          max-width: 300px;
+          max-width: 350px;
         }
 
-        .phone-icon {
-          font-size: 4rem;
-          margin-bottom: 1rem;
-          animation: shake 1s ease-in-out infinite;
-          transform-origin: center;
+        .phone-transition {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .phone {
+          border: 3px solid white;
+          border-radius: 12px;
+          position: relative;
+          background: #333;
+        }
+
+        .phone.portrait {
+          width: 50px;
+          height: 80px;
+        }
+
+        .phone.landscape {
+          width: 80px;
+          height: 50px;
+        }
+
+        .phone-screen {
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          right: 8px;
+          bottom: 8px;
+          background: #1a1a1a;
+          border-radius: 6px;
+        }
+
+        .arrow {
+          font-size: 2rem;
+          color: white;
+          animation: slide-bounce 2s ease-in-out infinite;
         }
 
         .orientation-content h2 {
@@ -52,25 +91,15 @@ export default function OrientationOverlay() {
           opacity: 0.8;
         }
 
-        .rotation-hint {
-          margin-top: 1rem;
-        }
-
-        .arrow {
-          font-size: 2rem;
-          animation: rotate 2s linear infinite;
-          display: inline-block;
-        }
-
-        @keyframes shake {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(-10deg); }
-          75% { transform: rotate(10deg); }
-        }
-
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes slide-bounce {
+          0%, 100% {
+            transform: translateX(0);
+            opacity: 0.8;
+          }
+          50% {
+            transform: translateX(8px);
+            opacity: 1;
+          }
         }
 
         /* Show overlay only on mobile devices in portrait mode */
