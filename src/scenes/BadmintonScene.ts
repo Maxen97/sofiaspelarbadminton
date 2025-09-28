@@ -8,8 +8,8 @@ import { GamePhysics } from '../utils/GamePhysics';
 import { CharacterSelection } from '../utils/characterOptions';
 
 export class BadmintonScene extends Phaser.Scene {
-  private shuttlecock!: Phaser.Physics.Arcade.Image;
-  private gameState: GameState = 'playing';
+  private shuttlecock: Phaser.Physics.Arcade.Image | null = null;
+  private gameState: GameState = 'ready';
   private lastLogTime: number = 0;
   private score: GameScore = { player: 0, computer: 0 };
   private banner!: Phaser.GameObjects.Image;
@@ -49,9 +49,6 @@ export class BadmintonScene extends Phaser.Scene {
 
     this.courtRenderer.renderCourt();
 
-    this.shuttlecock = this.physics.add.image(width - 100, height - 120, 'shuttlecock')
-      .setOrigin(0.5, 0.5);
-
     this.computerAI = new ComputerAI(this);
 
     this.playerCharacter = new PlayerCharacter(this, this.courtRenderer);
@@ -60,15 +57,19 @@ export class BadmintonScene extends Phaser.Scene {
     this.computerCharacter = new ComputerCharacter(this, this.courtRenderer);
     this.computerCharacter.create(this.courtRenderer.getDimensions());
 
+    // Apply initial depth scaling to characters
+    const courtDimensions = this.courtRenderer.getDimensions();
+    this.playerCharacter.update(courtDimensions);
+    this.computerCharacter.update(courtDimensions);
+
     this.swipeHandler = new SwipeHandler(
       this,
       (swipeVector, duration) => this.hitShuttlecockWithSwipe(swipeVector, duration),
       () => this.gameState === 'playing',
-      () => this.shuttlecock.x < this.scale.width / 2 + 20
+      () => this.shuttlecock !== null && this.shuttlecock.x < this.scale.width / 2 + 20
     );
 
-    this.serveShuttlecock();
-    this.swipeHandler.setupHandlers();
+    this.showReadyMessage();
 
     const bannerHeight = 80;
     const bannerScale = bannerHeight / this.textures.get('banner').getSourceImage().height;
@@ -136,7 +137,13 @@ export class BadmintonScene extends Phaser.Scene {
     const serveY = courtDimensions.top + 50;
     const courtBounds = this.courtRenderer.getCourtXAtY(serveY);
 
-    this.shuttlecock.setPosition(courtBounds.right - 20, serveY);
+    // Create shuttlecock when the game actually starts
+    if (!this.shuttlecock) {
+      this.shuttlecock = this.physics.add.image(courtBounds.right - 20, serveY, 'shuttlecock')
+        .setOrigin(0.5, 0.5);
+    } else {
+      this.shuttlecock.setPosition(courtBounds.right - 20, serveY);
+    }
 
     const velocity = GamePhysics.generateServeVelocity();
     this.shuttlecock.setVelocity(velocity.x, velocity.y);
@@ -145,13 +152,14 @@ export class BadmintonScene extends Phaser.Scene {
     this.computerAI.reset();
     this.lastHitter = 'computer';
     this.computerCharacter.playSwingAnimation(this.shuttlecock.x);
+    this.swipeHandler.setupHandlers();
   }
 
   private hitShuttlecockWithSwipe(swipeVector: { x: number; y: number }, swipeDuration: number) {
     console.log('hitShuttlecockWithSwipe called, swipeVector:', swipeVector, 'duration:', swipeDuration);
 
-    if (this.gameState !== 'playing') {
-      console.log('Game not in playing state');
+    if (this.gameState !== 'playing' || !this.shuttlecock) {
+      console.log('Game not in playing state or shuttlecock not available');
       return;
     }
 
@@ -171,13 +179,15 @@ export class BadmintonScene extends Phaser.Scene {
     this.swipeHandler.resetSwipeState();
     this.computerAI.reset();
 
-    this.shuttlecock.setVelocity(0, 0);
+    if (this.shuttlecock) {
+      this.shuttlecock.setVelocity(0, 0);
+    }
     this.physics.pause();
 
     const { width } = this.scale;
     let scoreMessage = '';
 
-    if (this.shuttlecock.x > width / 2) {
+    if (this.shuttlecock && this.shuttlecock.x > width / 2) {
       this.score.player++;
       scoreMessage = 'Snyggt!';
     } else {
@@ -205,6 +215,22 @@ export class BadmintonScene extends Phaser.Scene {
     });
   }
 
+  private showReadyMessage() {
+    const readyText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Tryck för att spela', {
+      fontSize: '24px',
+      color: '#00ff00',
+      backgroundColor: '#000000',
+      padding: { x: 20, y: 10 },
+      align: 'center'
+    }).setOrigin(0.5);
+
+    this.swipeHandler.setupRestartHandler(() => {
+      console.log('Game started');
+      readyText.destroy();
+      this.serveShuttlecock();
+    });
+  }
+
   private gameOverOutOfBounds() {
     console.log('Game over: Out of bounds! Last hitter was:', this.lastHitter);
     this.gameState = 'missed';
@@ -212,7 +238,9 @@ export class BadmintonScene extends Phaser.Scene {
     this.swipeHandler.resetSwipeState();
     this.computerAI.reset();
 
-    this.shuttlecock.setVelocity(0, 0);
+    if (this.shuttlecock) {
+      this.shuttlecock.setVelocity(0, 0);
+    }
     this.physics.pause();
 
     let scoreMessage = '';

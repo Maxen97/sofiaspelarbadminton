@@ -28,7 +28,7 @@ export interface ComputerAIState {
   hitTimer: number;
 }
 
-export type GameState = 'playing' | 'missed';
+export type GameState = 'ready' | 'playing' | 'missed';
 
 export type ShotType = 'smash' | 'drive' | 'clear' | 'drop shot';
 
