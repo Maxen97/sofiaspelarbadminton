@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Character, CHARACTER_OPTIONS, CharacterSelection as CharacterSelectionType } from '@/utils/characterOptions';
 
 interface CharacterSelectProps {
@@ -138,27 +139,38 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
   const canStartGame = playerCharacter && computerCharacter;
 
   return (
-    <div className="h-screen bg-gradient-to-b from-blue-400 to-green-400 p-4 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-b from-background to-background/95 p-4 flex flex-col overflow-hidden">
       {/* Back Arrow */}
       <Link
         href="/"
-        className="absolute top-4 left-4 z-40 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors duration-200"
+        className="absolute top-4 left-4 z-40 w-10 h-10 bg-foreground/10 hover:bg-foreground/20 rounded-full flex items-center justify-center transition-colors duration-200"
       >
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </Link>
 
-      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-white text-center">
+      {/* Logo */}
+      <div className="absolute top-4 right-4 z-40">
+        <Image
+          src="/logo.png"
+          alt="Sofia Spelar Badminton Logo"
+          width={90}
+          height={90}
+          className="rounded-lg"
+        />
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-12 md:space-y-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground text-center">
           Välj Spelare
         </h1>
 
         {/* Character Selection Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full max-w-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-6 w-full max-w-xl">
           {/* Player Selection */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-white text-center">
+          <div className="space-y-3 md:space-y-2">
+            <h2 className="text-lg font-semibold text-foreground text-center">
               Du
             </h2>
             <CharacterSelect
@@ -170,8 +182,8 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
           </div>
 
           {/* Computer Selection */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-white text-center">
+          <div className="space-y-6 md:space-y-2">
+            <h2 className="text-lg font-semibold text-foreground text-center">
               Motståndare
             </h2>
             <CharacterSelect
@@ -187,13 +199,13 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
         <button
           onClick={handleStartGame}
           disabled={!canStartGame}
-          className={`px-6 py-3 text-lg font-bold rounded-lg transition-all duration-200 ${
+          className={`px-8 py-4 text-lg font-medium rounded-full transition-all duration-200 ${
             canStartGame
-              ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl'
+              ? 'bg-foreground text-background hover:scale-105 hover:shadow-lg active:scale-95'
               : 'bg-gray-400 text-gray-600 cursor-not-allowed'
           }`}
         >
-          Start Game
+          Starta
         </button>
       </div>
     </div>
