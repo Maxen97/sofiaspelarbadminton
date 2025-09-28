@@ -5,6 +5,7 @@ import { ComputerAI } from '../components/ComputerAI';
 import { PlayerCharacter } from '../components/PlayerCharacter';
 import { ComputerCharacter } from '../components/ComputerCharacter';
 import { GamePhysics } from '../utils/GamePhysics';
+import { CharacterSelection } from '../utils/characterOptions';
 
 export class BadmintonScene extends Phaser.Scene {
   private shuttlecock!: Phaser.Physics.Arcade.Image;
@@ -21,15 +22,18 @@ export class BadmintonScene extends Phaser.Scene {
   private computerAI!: ComputerAI;
   private playerCharacter!: PlayerCharacter;
   private computerCharacter!: ComputerCharacter;
+  private characterSelection: CharacterSelection;
 
-  constructor() {
+  constructor(characterSelection: CharacterSelection) {
     super({ key: 'BadmintonScene' });
+    this.characterSelection = characterSelection;
   }
 
   preload() {
     this.courtRenderer = new CourtRenderer(this);
     this.courtRenderer.createTextures();
-    this.load.image('playerBody', '/sprites/body_male.png');
+    this.load.image('playerBody', this.characterSelection.player.spriteBodyUrl);
+    this.load.image('computerBody', this.characterSelection.computer.spriteBodyUrl);
     this.load.image('playerArm', '/sprites/arm.png');
     this.load.image('banner', '/sprites/banner.png');
     this.load.image('arena', '/sprites/arena.png');

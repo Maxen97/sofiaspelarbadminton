@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { CharacterSelection } from '@/utils/characterOptions';
 
 type PhaserGameRef = {
   scene: {
@@ -12,7 +13,11 @@ type PhaserGameRef = {
   destroy: (removeCanvas: boolean, noReturn?: boolean) => void;
 } | null;
 
-const BadmintonGame = () => {
+interface BadmintonGameProps {
+  characterSelection: CharacterSelection;
+}
+
+const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
   const gameRef = useRef<HTMLDivElement>(null);
   const phaserGameRef = useRef<PhaserGameRef>(null);
 
@@ -55,7 +60,7 @@ const BadmintonGame = () => {
             debug: false
           }
         },
-        scene: BadmintonScene,
+        scene: new BadmintonScene(characterSelection),
         scale: {
           mode: Phaser.Scale.RESIZE,
           autoCenter: Phaser.Scale.CENTER_BOTH
@@ -99,7 +104,7 @@ const BadmintonGame = () => {
       window.removeEventListener('resize', handleResize);
       destroyGame();
     };
-  }, []);
+  }, [characterSelection]);
 
   return (
     <div

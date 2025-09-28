@@ -47,7 +47,7 @@ export class ComputerCharacter {
   }
 
   private createBody() {
-    this.body = this.scene.add.image(0, 0, 'playerBody');
+    this.body = this.scene.add.image(0, 0, 'computerBody');
 
     // Set origin to bottom-center so character stands on ground
     this.body.setOrigin(0.5, 1);
