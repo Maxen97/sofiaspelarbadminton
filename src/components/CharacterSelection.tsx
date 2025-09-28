@@ -1,7 +1,120 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Character, CHARACTER_OPTIONS, CharacterSelection as CharacterSelectionType } from '@/utils/characterOptions';
+
+interface CharacterSelectProps {
+  placeholder: string;
+  selectedCharacter: Character | null;
+  onSelect: (character: Character) => void;
+  accentColor: 'yellow' | 'red';
+}
+
+function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor }: CharacterSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const accentColors = {
+    yellow: {
+      button: 'border-yellow-400 bg-yellow-50',
+      buttonHover: 'hover:border-yellow-500',
+      dropdown: 'border-yellow-200',
+      option: 'hover:bg-yellow-50',
+      optionSelected: 'bg-yellow-100',
+    },
+    red: {
+      button: 'border-red-400 bg-red-50',
+      buttonHover: 'hover:border-red-500',
+      dropdown: 'border-red-200',
+      option: 'hover:bg-red-50',
+      optionSelected: 'bg-red-100',
+    },
+  };
+
+  const colors = accentColors[accentColor];
+
+  return (
+    <div className="relative w-full max-w-[10rem] mx-auto" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full aspect-square p-2 bg-white border-2 rounded-lg shadow-sm transition-all duration-200 ${
+          selectedCharacter ? colors.button : 'border-gray-300 hover:border-gray-400'
+        } ${colors.buttonHover} focus:outline-none focus:ring-2 focus:ring-white/50 relative`}
+      >
+        {selectedCharacter ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <img
+              src={selectedCharacter.spriteBodyUrl}
+              alt={selectedCharacter.displayName}
+              className="w-12 h-12 object-contain mb-1"
+            />
+            <span className="font-medium text-gray-900 text-xs text-center leading-tight">{selectedCharacter.displayName}</span>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="w-12 h-12 bg-gray-200 rounded-lg mb-1 flex items-center justify-center">
+              <span className="text-gray-400 text-lg">?</span>
+            </div>
+            <span className="text-gray-500 text-xs text-center leading-tight">{placeholder}</span>
+          </div>
+        )}
+        <svg
+          className={`absolute top-2 right-2 w-4 h-4 text-gray-400 transition-transform duration-200 ${
+            isOpen ? 'transform rotate-180' : ''
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className={`absolute z-10 w-64 left-1/2 transform -translate-x-1/2 mt-1 bg-white border-2 ${colors.dropdown} rounded-lg shadow-lg p-2`}>
+          <div className="grid grid-cols-3 gap-1">
+            {CHARACTER_OPTIONS.map((character) => (
+              <button
+                key={character.id}
+                type="button"
+                onClick={() => {
+                  onSelect(character);
+                  setIsOpen(false);
+                }}
+                className={`aspect-square p-1 rounded-lg transition-colors duration-150 border-2 ${
+                  selectedCharacter?.id === character.id
+                    ? `${colors.optionSelected} ${colors.button.split(' ')[0]}`
+                    : `${colors.option} border-transparent hover:border-gray-200`
+                }`}
+              >
+                <div className="flex flex-col items-center justify-center h-full">
+                  <img
+                    src={character.spriteBodyUrl}
+                    alt={character.displayName}
+                    className="w-8 h-8 object-contain mb-0.5"
+                  />
+                  <span className="font-medium text-gray-900 text-[10px] text-center leading-tight">{character.displayName}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface CharacterSelectionProps {
   onSelectionComplete: (selection: CharacterSelectionType) => void;
@@ -11,13 +124,16 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
   const [playerCharacter, setPlayerCharacter] = useState<Character | null>(null);
   const [computerCharacter, setComputerCharacter] = useState<Character | null>(null);
 
-  const handleCharacterSelect = (character: Character, type: 'player' | 'computer') => {
-    if (type === 'player') {
-      setPlayerCharacter(character);
-    } else {
-      setComputerCharacter(character);
-    }
-  };
+  // Set default selections on component mount
+  useEffect(() => {
+    // Default player to first male character (male_1)
+    const defaultPlayer = CHARACTER_OPTIONS.find(char => char.id === 'male_1') || CHARACTER_OPTIONS[0];
+    setPlayerCharacter(defaultPlayer);
+
+    // Random computer character
+    const randomIndex = Math.floor(Math.random() * CHARACTER_OPTIONS.length);
+    setComputerCharacter(CHARACTER_OPTIONS[randomIndex]);
+  }, []);
 
   const handleStartGame = () => {
     if (playerCharacter && computerCharacter) {
@@ -31,71 +147,38 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
   const canStartGame = playerCharacter && computerCharacter;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-400 to-green-400 p-4 flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-8 text-center">
+    <div className="h-screen bg-gradient-to-b from-blue-400 to-green-400 p-4 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-white text-center">
           Choose Your Characters
         </h1>
 
-        {/* Player Selection */}
-        <div className="mb-8 w-full">
-          <h2 className="text-xl font-semibold text-white mb-4 text-center">
-            Your Character {playerCharacter && `(${playerCharacter.displayName})`}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {CHARACTER_OPTIONS.map((character) => (
-              <button
-                key={`player-${character.id}`}
-                onClick={() => handleCharacterSelect(character, 'player')}
-                className={`aspect-square rounded-lg border-4 transition-all duration-200 ${
-                  playerCharacter?.id === character.id
-                    ? 'border-yellow-400 bg-yellow-100'
-                    : 'border-white/30 bg-white/20 hover:border-white/60'
-                }`}
-              >
-                <div className="w-full h-full flex flex-col items-center justify-center p-2">
-                  <img
-                    src={character.spriteBodyUrl}
-                    alt={character.displayName}
-                    className="w-12 h-12 md:w-16 md:h-16 object-contain mb-2"
-                  />
-                  <span className="text-white text-xs md:text-sm font-medium text-center">
-                    {character.displayName}
-                  </span>
-                </div>
-              </button>
-            ))}
+        {/* Character Selection Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full max-w-xl">
+          {/* Player Selection */}
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-white text-center">
+              Your Character
+            </h2>
+            <CharacterSelect
+              placeholder="Select your character"
+              selectedCharacter={playerCharacter}
+              onSelect={setPlayerCharacter}
+              accentColor="yellow"
+            />
           </div>
-        </div>
 
-        {/* Computer Selection */}
-        <div className="mb-8 w-full">
-          <h2 className="text-xl font-semibold text-white mb-4 text-center">
-            Computer Character {computerCharacter && `(${computerCharacter.displayName})`}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {CHARACTER_OPTIONS.map((character) => (
-              <button
-                key={`computer-${character.id}`}
-                onClick={() => handleCharacterSelect(character, 'computer')}
-                className={`aspect-square rounded-lg border-4 transition-all duration-200 ${
-                  computerCharacter?.id === character.id
-                    ? 'border-red-400 bg-red-100'
-                    : 'border-white/30 bg-white/20 hover:border-white/60'
-                }`}
-              >
-                <div className="w-full h-full flex flex-col items-center justify-center p-2">
-                  <img
-                    src={character.spriteBodyUrl}
-                    alt={character.displayName}
-                    className="w-12 h-12 md:w-16 md:h-16 object-contain mb-2"
-                  />
-                  <span className="text-white text-xs md:text-sm font-medium text-center">
-                    {character.displayName}
-                  </span>
-                </div>
-              </button>
-            ))}
+          {/* Computer Selection */}
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-white text-center">
+              Computer Character
+            </h2>
+            <CharacterSelect
+              placeholder="Select computer character"
+              selectedCharacter={computerCharacter}
+              onSelect={setComputerCharacter}
+              accentColor="red"
+            />
           </div>
         </div>
 
@@ -103,7 +186,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
         <button
           onClick={handleStartGame}
           disabled={!canStartGame}
-          className={`px-8 py-4 text-xl font-bold rounded-lg transition-all duration-200 ${
+          className={`px-6 py-3 text-lg font-bold rounded-lg transition-all duration-200 ${
             canStartGame
               ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl'
               : 'bg-gray-400 text-gray-600 cursor-not-allowed'
