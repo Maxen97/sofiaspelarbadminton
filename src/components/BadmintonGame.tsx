@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { CharacterSelection } from '@/utils/characterOptions';
+import { GameScore } from '@/types/GameTypes';
 
 type PhaserGameRef = {
   scene: {
@@ -20,6 +21,7 @@ interface BadmintonGameProps {
 const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
   const gameRef = useRef<HTMLDivElement>(null);
   const phaserGameRef = useRef<PhaserGameRef>(null);
+  const [score, setScore] = useState<GameScore>({ player: 0, computer: 0 });
 
   useEffect(() => {
     const shouldInitializeGame = () => {
@@ -60,7 +62,7 @@ const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
             debug: false
           }
         },
-        scene: new BadmintonScene(characterSelection),
+        scene: new BadmintonScene(characterSelection, setScore),
         scale: {
           mode: Phaser.Scale.RESIZE,
           autoCenter: Phaser.Scale.CENTER_BOTH
@@ -107,11 +109,29 @@ const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
   }, [characterSelection]);
 
   return (
-    <div
-      ref={gameRef}
-      className="w-full h-screen"
-      style={{ touchAction: 'none' }}
-    />
+    <div className="relative w-full h-screen">
+      <div
+        ref={gameRef}
+        className="w-full h-screen"
+        style={{ touchAction: 'none' }}
+      />
+      {/* Scoreboard overlay */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-10">
+        <div className="bg-gradient-to-b from-blue-900/90 to-blue-800/90 rounded-b-2xl shadow-lg px-8 py-3 border-b-4 border-blue-700">
+          <div className="flex items-center gap-8">
+            <div className="text-center">
+              <div className="text-white/70 text-sm font-medium mb-1">Du</div>
+              <div className="text-white text-3xl font-bold tabular-nums">{score.player}</div>
+            </div>
+            <div className="text-white/50 text-2xl font-light">-</div>
+            <div className="text-center">
+              <div className="text-white/70 text-sm font-medium mb-1">Dator</div>
+              <div className="text-white text-3xl font-bold tabular-nums">{score.computer}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

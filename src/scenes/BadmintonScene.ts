@@ -12,9 +12,6 @@ export class BadmintonScene extends Phaser.Scene {
   private gameState: GameState = 'ready';
   private lastLogTime: number = 0;
   private score: GameScore = { player: 0, computer: 0 };
-  private banner!: Phaser.GameObjects.Image;
-  private playerScoreText!: Phaser.GameObjects.Text;
-  private computerScoreText!: Phaser.GameObjects.Text;
   private lastHitter: 'player' | 'computer' | null = null;
 
   private courtRenderer!: CourtRenderer;
@@ -23,10 +20,12 @@ export class BadmintonScene extends Phaser.Scene {
   private playerCharacter!: PlayerCharacter;
   private computerCharacter!: ComputerCharacter;
   private characterSelection: CharacterSelection;
+  private onScoreUpdate: (score: GameScore) => void;
 
-  constructor(characterSelection: CharacterSelection) {
+  constructor(characterSelection: CharacterSelection, onScoreUpdate: (score: GameScore) => void) {
     super({ key: 'BadmintonScene' });
     this.characterSelection = characterSelection;
+    this.onScoreUpdate = onScoreUpdate;
   }
 
   preload() {
@@ -35,7 +34,6 @@ export class BadmintonScene extends Phaser.Scene {
     this.load.image('playerBody', this.characterSelection.player.spriteBodyUrl);
     this.load.image('computerBody', this.characterSelection.computer.spriteBodyUrl);
     this.load.image('playerArm', '/sprites/arm.png');
-    this.load.image('banner', '/sprites/banner.png');
     this.load.image('arena', '/sprites/arena.png');
   }
 
@@ -85,25 +83,6 @@ export class BadmintonScene extends Phaser.Scene {
     );
 
     this.showReadyMessage();
-
-    const bannerHeight = 80;
-    const bannerScale = bannerHeight / this.textures.get('banner').getSourceImage().height;
-
-    this.banner = this.add.image(width / 2, 0, 'banner')
-      .setOrigin(0.5, 0)
-      .setScale(bannerScale);
-
-    this.playerScoreText = this.add.text(width * 0.4, bannerHeight / 2, this.score.player.toString(), {
-      fontSize: '28px',
-      color: '#ffffff',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
-
-    this.computerScoreText = this.add.text(width * 0.6, bannerHeight / 2, this.score.computer.toString(), {
-      fontSize: '28px',
-      color: '#ffffff',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
   }
 
   update() {
@@ -210,8 +189,7 @@ export class BadmintonScene extends Phaser.Scene {
       scoreMessage = 'Å nej!';
     }
 
-    this.playerScoreText.setText(this.score.player.toString());
-    this.computerScoreText.setText(this.score.computer.toString());
+    this.onScoreUpdate({ ...this.score });
 
     const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTryck för att fortsätta`, {
       fontSize: '24px',
@@ -271,8 +249,7 @@ export class BadmintonScene extends Phaser.Scene {
       scoreMessage = 'Utanför!\nMotståndare poängterar!';
     }
 
-    this.playerScoreText.setText(this.score.player.toString());
-    this.computerScoreText.setText(this.score.computer.toString());
+    this.onScoreUpdate({ ...this.score });
 
     const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTryck för att fortsätta`, {
       fontSize: '24px',
