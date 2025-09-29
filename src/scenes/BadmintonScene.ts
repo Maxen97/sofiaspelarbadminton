@@ -42,10 +42,25 @@ export class BadmintonScene extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
 
-    // Add arena background image
-    this.add.image(width / 2, height / 2, 'arena')
-      .setOrigin(0.5, 0.5)
-      .setDisplaySize(width, height);
+    // Add arena background image with preserved aspect ratio, anchored to bottom
+    const arenaTexture = this.textures.get('arena').getSourceImage();
+    const arenaAspectRatio = arenaTexture.width / arenaTexture.height;
+    const screenAspectRatio = width / height;
+
+    let arenaWidth, arenaHeight;
+    if (screenAspectRatio > arenaAspectRatio) {
+      // Screen is wider than image - fit to width
+      arenaWidth = width;
+      arenaHeight = width / arenaAspectRatio;
+    } else {
+      // Screen is taller than image - fit to height
+      arenaHeight = height;
+      arenaWidth = height * arenaAspectRatio;
+    }
+
+    this.add.image(width / 2, height, 'arena')
+      .setOrigin(0.5, 1)
+      .setDisplaySize(arenaWidth, arenaHeight);
 
     this.courtRenderer.renderCourt();
 

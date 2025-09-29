@@ -56,15 +56,6 @@ export class CourtRenderer {
   }
 
   renderCourt() {
-    const { bottom, top, nearWidth, farWidth, centerX } = this.dimensions;
-
-    const nearLeft = centerX - nearWidth / 2;
-    const nearRight = centerX + nearWidth / 2;
-    const farLeft = centerX - farWidth / 2;
-    const farRight = centerX + farWidth / 2;
-
-    this.renderCourtSurface(nearLeft, nearRight, farLeft, farRight, bottom, top);
-    this.renderCourtLines(nearLeft, nearRight, farLeft, farRight, bottom, top);
     this.renderNet();
   }
 
