@@ -6,28 +6,35 @@ export class ComputerCharacter {
   private courtRenderer: CourtRenderer;
   private container!: Phaser.GameObjects.Container;
   private body!: Phaser.GameObjects.Image;
+  private head?: Phaser.GameObjects.Image;
   private arm!: Phaser.GameObjects.Image;
   private armRotationTween?: Phaser.Tweens.Tween;
   private movementTween?: Phaser.Tweens.Tween;
 
   private readonly bodyWidth = 90;
   private readonly bodyHeight = 180;
+  private readonly headSize = 60;
   private readonly armWidth = 120;
   private readonly armHeight = 24;
   private readonly maxMovement = 120;
 
   private characterY: number = 0;
   private baseX: number = 0;
+  private hasHeadSprite: boolean = false;
 
-  constructor(scene: Phaser.Scene, courtRenderer: CourtRenderer) {
+  constructor(scene: Phaser.Scene, courtRenderer: CourtRenderer, hasHeadSprite: boolean = false) {
     this.scene = scene;
     this.courtRenderer = courtRenderer;
+    this.hasHeadSprite = hasHeadSprite;
   }
 
   create(courtDimensions: CourtDimensions) {
     this.calculatePosition(courtDimensions);
     this.createContainer();
     this.createBody();
+    if (this.hasHeadSprite) {
+      this.createHead();
+    }
     this.createArm();
   }
 
@@ -60,6 +67,26 @@ export class ComputerCharacter {
     this.body.setFlipX(true);
 
     this.container.add(this.body);
+  }
+
+  private createHead() {
+    this.head = this.scene.add.image(0, 0, 'computerHead');
+
+    // Position head at top of body
+    const headY = -this.bodyHeight - this.headSize / 2;
+    this.head.setPosition(0, headY);
+
+    // Set origin to center
+    this.head.setOrigin(0.5, 0.5);
+
+    // Scale head to desired size
+    const headScale = this.headSize / this.head.height;
+    this.head.setScale(headScale);
+
+    // Flip the head to match the body
+    this.head.setFlipX(true);
+
+    this.container.add(this.head);
   }
 
   private createArm() {

@@ -33,6 +33,12 @@ export class BadmintonScene extends Phaser.Scene {
     this.courtRenderer.createTextures();
     this.load.image('playerBody', this.characterSelection.player.spriteBodyUrl);
     this.load.image('computerBody', this.characterSelection.computer.spriteBodyUrl);
+    if (this.characterSelection.player.spriteHeadUrl) {
+      this.load.image('playerHead', this.characterSelection.player.spriteHeadUrl);
+    }
+    if (this.characterSelection.computer.spriteHeadUrl) {
+      this.load.image('computerHead', this.characterSelection.computer.spriteHeadUrl);
+    }
     this.load.image('playerArm', '/sprites/arm.png');
     this.load.image('arena', '/sprites/arena.png');
   }
@@ -64,10 +70,18 @@ export class BadmintonScene extends Phaser.Scene {
 
     this.computerAI = new ComputerAI(this);
 
-    this.playerCharacter = new PlayerCharacter(this, this.courtRenderer);
+    this.playerCharacter = new PlayerCharacter(
+      this,
+      this.courtRenderer,
+      !!this.characterSelection.player.spriteHeadUrl
+    );
     this.playerCharacter.create(this.courtRenderer.getDimensions());
 
-    this.computerCharacter = new ComputerCharacter(this, this.courtRenderer);
+    this.computerCharacter = new ComputerCharacter(
+      this,
+      this.courtRenderer,
+      !!this.characterSelection.computer.spriteHeadUrl
+    );
     this.computerCharacter.create(this.courtRenderer.getDimensions());
 
     // Apply initial depth scaling to characters

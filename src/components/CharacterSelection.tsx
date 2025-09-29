@@ -58,11 +58,11 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
         {selectedCharacter ? (
           <div className="flex flex-col items-center justify-center h-full">
             <img
-              src={selectedCharacter.spriteBodyUrl}
+              src={selectedCharacter.spriteHeadUrl || selectedCharacter.spriteBodyUrl}
               alt={selectedCharacter.displayName}
-              className="w-12 h-12 object-contain mb-1"
+              className="w-16 h-16 object-contain mb-1"
             />
-            <span className="font-medium text-gray-900 text-xs text-center leading-tight">{selectedCharacter.displayName}</span>
+            <span className="font-bold text-gray-900 text-base text-center leading-tight">{selectedCharacter.displayName}</span>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full">
@@ -93,11 +93,11 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
               >
                 <div className="flex flex-col items-center justify-center h-full">
                   <img
-                    src={character.spriteBodyUrl}
+                    src={character.spriteHeadUrl || character.spriteBodyUrl}
                     alt={character.displayName}
-                    className="w-12 h-12 object-contain mb-1"
+                    className="w-16 h-16 object-contain mb-1"
                   />
-                  <span className="font-medium text-gray-900 text-xs text-center leading-tight">{character.displayName}</span>
+                  <span className="font-bold text-gray-900 text-base text-center leading-tight">{character.displayName}</span>
                 </div>
               </button>
             ))}
