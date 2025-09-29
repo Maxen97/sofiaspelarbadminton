@@ -13,7 +13,7 @@ export class ComputerCharacter {
 
   private readonly bodyWidth = 90;
   private readonly bodyHeight = 180;
-  private readonly headSize = 60;
+  private readonly headSize = 90;
   private readonly armWidth = 120;
   private readonly armHeight = 24;
   private readonly maxMovement = 120;
@@ -73,7 +73,7 @@ export class ComputerCharacter {
     this.head = this.scene.add.image(0, 0, 'computerHead');
 
     // Position head at top of body
-    const headY = -this.bodyHeight - this.headSize / 2;
+    const headY = -this.bodyHeight - this.headSize / 2 + 32;
     this.head.setPosition(0, headY);
 
     // Set origin to center
