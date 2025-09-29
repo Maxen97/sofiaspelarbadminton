@@ -118,8 +118,8 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
 
   // Set default selections on component mount
   useEffect(() => {
-    // Default player to first male character (male_1)
-    const defaultPlayer = CHARACTER_OPTIONS.find(char => char.id === 'male_1') || CHARACTER_OPTIONS[0];
+    // Default player to Sofia
+    const defaultPlayer = CHARACTER_OPTIONS.find(char => char.id === 'sofia') || CHARACTER_OPTIONS[0];
     setPlayerCharacter(defaultPlayer);
 
     // Random computer character

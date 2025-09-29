@@ -125,7 +125,7 @@ const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
             </div>
             <div className="text-white/50 text-2xl font-light">-</div>
             <div className="text-center">
-              <div className="text-white/70 text-sm font-medium mb-1">Dator</div>
+              <div className="text-white/70 text-sm font-medium mb-1">{characterSelection.computer.displayName}</div>
               <div className="text-white text-3xl font-bold tabular-nums">{score.computer}</div>
             </div>
           </div>
