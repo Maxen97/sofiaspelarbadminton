@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { CharacterSelection } from '@/utils/characterOptions';
 import { GameScore } from '@/types/GameTypes';
 
@@ -130,6 +131,12 @@ const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
             </div>
           </div>
         </div>
+      </div>
+      {/* Menu button */}
+      <div className="absolute top-0 right-0 z-10">
+        <Link href="/" className="block bg-gradient-to-b from-blue-900/90 to-blue-800/90 rounded-bl-2xl shadow-lg px-8 py-3 border-b-4 border-l-4 border-blue-700 pointer-events-auto">
+          <div className="text-white text-2xl font-bold">Menu</div>
+        </Link>
       </div>
     </div>
   );
