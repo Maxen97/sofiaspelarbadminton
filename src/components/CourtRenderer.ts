@@ -116,33 +116,40 @@ export class CourtRenderer {
     const { bottom, top, centerX } = this.dimensions;
     const netGraphics = this.scene.add.graphics();
 
-    const topPostX = centerX - 10;
-    const bottomPostX = centerX + 10;
+    const topPostX = centerX - 20;
+    const bottomPostX = centerX + 20;
+
+    const bottomPostTop = bottom - 60;
 
     netGraphics.fillStyle(0x808080, 1);
     netGraphics.fillRect(topPostX - 3, top - 5, 6, 65);
-    netGraphics.fillRect(bottomPostX - 3, bottom - 60, 6, 65);
 
     netGraphics.lineStyle(1, 0xffffff, 0.8);
-    const netWidth = 50;
+    const netWidth = 5;
 
     for (let i = 0; i <= 20; i++) {
       const t = i / 20;
       const x1 = topPostX + (bottomPostX - topPostX) * t;
-      const y1 = top + (bottom - top) * t;
+      const y1 = top + (bottomPostTop - top) * t;
       const x2 = x1 - netWidth;
-      netGraphics.strokeLineShape(new Phaser.Geom.Line(x1, y1, x2, y1));
+      const y2 = y1 + 50;
+      netGraphics.strokeLineShape(new Phaser.Geom.Line(x1, y1, x2, y2));
     }
 
     for (let i = 0; i <= 5; i++) {
       const xOffset = netWidth * (i / 5);
+      const yOffset = 50 * (i / 5);
       netGraphics.strokeLineShape(new Phaser.Geom.Line(
-        topPostX - xOffset, top,
-        bottomPostX - xOffset, bottom
+        topPostX - xOffset, 
+        top + yOffset,
+        bottomPostX - xOffset, 
+        bottomPostTop + yOffset
       ));
     }
 
+    netGraphics.fillRect(bottomPostX - 3, bottomPostTop, 6, 65);
+
     netGraphics.lineStyle(3, 0xffffff, 1);
-    netGraphics.strokeLineShape(new Phaser.Geom.Line(topPostX, top, bottomPostX, bottom));
+    netGraphics.strokeLineShape(new Phaser.Geom.Line(topPostX, top, bottomPostX, bottomPostTop));
   }
 }
