@@ -40,11 +40,6 @@ export class CourtRenderer {
 
   createTextures() {
     this.scene.add.graphics()
-      .fillStyle(0xffffff)
-      .fillCircle(10, 10, 10)
-      .generateTexture('shuttlecock', 20, 20);
-
-    this.scene.add.graphics()
       .fillStyle(0x2d5016)
       .fillRect(0, 0, 10, 10)
       .generateTexture('court', 10, 10);

@@ -9,6 +9,8 @@ import { CharacterSelection } from '../utils/characterOptions';
 
 export class BadmintonScene extends Phaser.Scene {
   private shuttlecock: Phaser.Physics.Arcade.Image | null = null;
+  private shuttlecockTrail: Phaser.GameObjects.Graphics | null = null;
+  private trailPositions: { x: number; y: number }[] = [];
   private gameState: GameState = 'ready';
   private lastLogTime: number = 0;
   private score: GameScore = { player: 0, computer: 0 };
@@ -41,6 +43,7 @@ export class BadmintonScene extends Phaser.Scene {
     }
     this.load.image('playerArm', '/sprites/arm.png');
     this.load.image('arena', '/sprites/arena.png');
+    this.load.image('shuttlecock', '/sprites/shuttlecock.png');
   }
 
   create() {
@@ -106,6 +109,33 @@ export class BadmintonScene extends Phaser.Scene {
       const y = this.shuttlecock.y;
       const currentVelocity = this.shuttlecock.body.velocity;
 
+      // Rotate shuttlecock to point in direction of velocity
+      const angle = Math.atan2(currentVelocity.y, currentVelocity.x) - Math.PI / 2;
+      this.shuttlecock.setRotation(angle);
+
+      // Update motion trail
+      this.trailPositions.push({ x, y });
+      if (this.trailPositions.length > 12) {
+        this.trailPositions.shift();
+      }
+
+      // Render trail with fading effect
+      if (this.shuttlecockTrail && this.trailPositions.length > 1) {
+        this.shuttlecockTrail.clear();
+        for (let i = 1; i < this.trailPositions.length; i++) {
+          const alpha = i / this.trailPositions.length;
+          this.shuttlecockTrail.lineStyle(4 * alpha, 0xffffff, alpha * 0.6);
+          this.shuttlecockTrail.strokeLineShape(
+            new Phaser.Geom.Line(
+              this.trailPositions[i - 1].x,
+              this.trailPositions[i - 1].y,
+              this.trailPositions[i].x,
+              this.trailPositions[i].y
+            )
+          );
+        }
+      }
+
       GamePhysics.applyAirResistance(this.shuttlecock);
 
       const courtDimensions = this.courtRenderer.getDimensions();
@@ -148,10 +178,17 @@ export class BadmintonScene extends Phaser.Scene {
     // Create shuttlecock when the game actually starts
     if (!this.shuttlecock) {
       this.shuttlecock = this.physics.add.image(courtBounds.right - 20, serveY, 'shuttlecock')
-        .setOrigin(0.5, 0.5);
+        .setOrigin(0.5, 0.5)
+        .setScale(1);
     } else {
       this.shuttlecock.setPosition(courtBounds.right - 20, serveY);
     }
+
+    // Initialize trail graphics
+    if (!this.shuttlecockTrail) {
+      this.shuttlecockTrail = this.add.graphics();
+    }
+    this.trailPositions = [];
 
     const velocity = GamePhysics.generateServeVelocity();
     this.shuttlecock.setVelocity(velocity.x, velocity.y);
@@ -190,6 +227,13 @@ export class BadmintonScene extends Phaser.Scene {
     if (this.shuttlecock) {
       this.shuttlecock.setVelocity(0, 0);
     }
+
+    // Clear trail
+    if (this.shuttlecockTrail) {
+      this.shuttlecockTrail.clear();
+    }
+    this.trailPositions = [];
+
     this.physics.pause();
 
     const { width } = this.scale;
@@ -248,6 +292,13 @@ export class BadmintonScene extends Phaser.Scene {
     if (this.shuttlecock) {
       this.shuttlecock.setVelocity(0, 0);
     }
+
+    // Clear trail
+    if (this.shuttlecockTrail) {
+      this.shuttlecockTrail.clear();
+    }
+    this.trailPositions = [];
+
     this.physics.pause();
 
     let scoreMessage = '';
