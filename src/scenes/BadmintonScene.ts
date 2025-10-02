@@ -213,6 +213,11 @@ export class BadmintonScene extends Phaser.Scene {
       return;
     }
 
+    if (this.lastHitter === 'player') {
+      console.log('Cannot hit shuttlecock consecutively');
+      return;
+    }
+
     const velocity = GamePhysics.calculateSwipeVelocity(swipeVector, swipeDuration);
 
     console.log('Direct swipe physics - horizontal:', velocity.x, 'vertical:', velocity.y);
