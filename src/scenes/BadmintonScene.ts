@@ -156,8 +156,9 @@ export class BadmintonScene extends Phaser.Scene {
       this.playerCharacter.update(courtDimensions);
       this.computerCharacter.update(courtDimensions);
 
-      const boundaryBuffer = 50;
-      if (x < -boundaryBuffer || x > width + boundaryBuffer || y < -boundaryBuffer) {
+      const sideBoundaryBuffer = 50;
+      const topBoundaryBuffer = 200;
+      if (x < -sideBoundaryBuffer || x > width + sideBoundaryBuffer || y < -topBoundaryBuffer) {
         console.log('Out of bounds! Position:', x, y, 'Last hitter:', this.lastHitter);
         this.gameOverOutOfBounds();
       } else if (y > courtDimensions.bottom - 10) {
