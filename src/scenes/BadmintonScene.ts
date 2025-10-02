@@ -252,9 +252,8 @@ export class BadmintonScene extends Phaser.Scene {
     const subText = this.add.text(0, 25, subtitle, {
       fontSize: '16px',
       color: '#ffffff',
-      align: 'center',
-      alpha: 0.9
-    }).setOrigin(0.5);
+      align: 'center'
+    }).setOrigin(0.5).setAlpha(0.9);
 
     // Create container
     const container = this.add.container(centerX, centerY, [bg, mainText, subText]);
