@@ -23,11 +23,13 @@ export class BadmintonScene extends Phaser.Scene {
   private computerCharacter!: ComputerCharacter;
   private characterSelection: CharacterSelection;
   private onScoreUpdate: (score: GameScore) => void;
+  private onGameReady?: () => void;
 
-  constructor(characterSelection: CharacterSelection, onScoreUpdate: (score: GameScore) => void) {
+  constructor(characterSelection: CharacterSelection, onScoreUpdate: (score: GameScore) => void, onGameReady?: () => void) {
     super({ key: 'BadmintonScene' });
     this.characterSelection = characterSelection;
     this.onScoreUpdate = onScoreUpdate;
+    this.onGameReady = onGameReady;
   }
 
   preload() {
@@ -100,6 +102,9 @@ export class BadmintonScene extends Phaser.Scene {
     );
 
     this.showReadyMessage();
+
+    // Notify that the game is ready
+    this.onGameReady?.();
   }
 
   update() {

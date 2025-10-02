@@ -17,9 +17,10 @@ type PhaserGameRef = {
 
 interface BadmintonGameProps {
   characterSelection: CharacterSelection;
+  onGameReady?: () => void;
 }
 
-const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
+const BadmintonGame = ({ characterSelection, onGameReady }: BadmintonGameProps) => {
   const gameRef = useRef<HTMLDivElement>(null);
   const phaserGameRef = useRef<PhaserGameRef>(null);
   const [score, setScore] = useState<GameScore>({ player: 0, computer: 0 });
@@ -63,7 +64,7 @@ const BadmintonGame = ({ characterSelection }: BadmintonGameProps) => {
             debug: false
           }
         },
-        scene: new BadmintonScene(characterSelection, setScore),
+        scene: new BadmintonScene(characterSelection, setScore, onGameReady),
         scale: {
           mode: Phaser.Scale.RESIZE,
           autoCenter: Phaser.Scale.CENTER_BOTH
