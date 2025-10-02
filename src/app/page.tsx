@@ -13,6 +13,12 @@ export default function Home() {
     setCurrentUrl(window.location.origin);
   }, []);
 
+  const getDisplayUrl = (url: string) => {
+    return url
+      .replace(/^https?:\/\//, "")
+      .replace(/^www\./, "");
+  };
+
   return (
     <div className="min-h-screen min-w-full flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/95">
       {/* Share Button */}
@@ -47,8 +53,8 @@ export default function Home() {
               <div className="bg-white p-4 rounded-lg shadow-lg mb-4">
                 <QRCodeSVG value={currentUrl} size={200} />
               </div>
-              <p className="text-lg text-foreground/70 text-center break-all px-4">
-                {currentUrl}
+              <p className="text-sm text-foreground/70 text-center break-all px-4">
+                {getDisplayUrl(currentUrl)}
               </p>
             </>
           )}
