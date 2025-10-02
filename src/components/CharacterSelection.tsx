@@ -155,7 +155,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
       </Link>
 
       {/* Logo */}
-      <div className="absolute top-4 right-4 z-40">
+      {/* <div className="absolute top-4 right-4 z-40">
         <Image
           src="/logo.png"
           alt="Sofia Spelar Badminton Logo"
@@ -163,7 +163,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
           height={90}
           className="rounded-lg landscape:w-[60px] landscape:h-[60px]"
         />
-      </div>
+      </div> */}
 
       <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-12 landscape:space-y-4 md:space-y-4">
         <h1 className="text-2xl landscape:text-xl md:text-3xl font-bold text-foreground text-center">
