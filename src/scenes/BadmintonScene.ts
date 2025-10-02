@@ -217,6 +217,51 @@ export class BadmintonScene extends Phaser.Scene {
     this.playerCharacter.playSwingAnimation(this.shuttlecock.x);
   }
 
+  private createMessageBox(
+    message: string,
+    subtitle: string,
+    bgColor: number,
+    textColor: string
+  ): { container: Phaser.GameObjects.Container; background: Phaser.GameObjects.Graphics } {
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
+
+    // Create background graphics
+    const bg = this.add.graphics();
+
+    // Shadow
+    bg.fillStyle(0x000000, 0.4);
+    bg.fillRoundedRect(-160, -74, 320, 148, 20);
+
+    // Main background
+    bg.fillStyle(bgColor, 0.95);
+    bg.fillRoundedRect(-154, -68, 308, 136, 16);
+
+    // Border highlight
+    bg.lineStyle(3, 0xffffff, 0.3);
+    bg.strokeRoundedRect(-154, -68, 308, 136, 16);
+
+    // Create text
+    const mainText = this.add.text(0, -20, message, {
+      fontSize: '28px',
+      color: textColor,
+      fontStyle: 'bold',
+      align: 'center'
+    }).setOrigin(0.5);
+
+    const subText = this.add.text(0, 25, subtitle, {
+      fontSize: '16px',
+      color: '#ffffff',
+      align: 'center',
+      alpha: 0.9
+    }).setOrigin(0.5);
+
+    // Create container
+    const container = this.add.container(centerX, centerY, [bg, mainText, subText]);
+
+    return { container, background: bg };
+  }
+
   private gameOver() {
     console.log('Game over triggered');
     this.gameState = 'missed';
@@ -238,28 +283,33 @@ export class BadmintonScene extends Phaser.Scene {
 
     const { width } = this.scale;
     let scoreMessage = '';
+    let bgColor = 0x000000;
+    let textColor = '#ffffff';
 
     if (this.shuttlecock && this.shuttlecock.x > width / 2) {
       this.score.player++;
       scoreMessage = 'Snyggt!';
+      bgColor = 0x16a34a; // Green
+      textColor = '#ffffff';
     } else {
       this.score.computer++;
-      scoreMessage = 'Å nej!';
+      scoreMessage = 'Miss!';
+      bgColor = 0xdc2626; // Red
+      textColor = '#ffffff';
     }
 
     this.onScoreUpdate({ ...this.score });
 
-    const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTryck för att fortsätta`, {
-      fontSize: '24px',
-      color: '#ff0000',
-      backgroundColor: '#000000',
-      padding: { x: 20, y: 10 },
-      align: 'center'
-    }).setOrigin(0.5);
+    const messageBox = this.createMessageBox(
+      scoreMessage,
+      'Tryck för att fortsätta',
+      bgColor,
+      textColor
+    );
 
     this.swipeHandler.setupRestartHandler(() => {
       console.log('Restart tapped');
-      gameOverText.destroy();
+      messageBox.container.destroy();
       this.physics.resume();
       this.serveShuttlecock();
       this.swipeHandler.setupHandlers();
@@ -267,17 +317,16 @@ export class BadmintonScene extends Phaser.Scene {
   }
 
   private showReadyMessage() {
-    const readyText = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Tryck för att spela', {
-      fontSize: '24px',
-      color: '#00ff00',
-      backgroundColor: '#000000',
-      padding: { x: 20, y: 10 },
-      align: 'center'
-    }).setOrigin(0.5);
+    const messageBox = this.createMessageBox(
+      'Redo att spela!',
+      'Tryck för att börja',
+      0x1e40af, // Blue
+      '#ffffff'
+    );
 
     this.swipeHandler.setupRestartHandler(() => {
       console.log('Game started');
-      readyText.destroy();
+      messageBox.container.destroy();
       this.serveShuttlecock();
     });
   }
@@ -302,31 +351,34 @@ export class BadmintonScene extends Phaser.Scene {
     this.physics.pause();
 
     let scoreMessage = '';
+    let bgColor = 0x000000;
 
     if (this.lastHitter === 'player') {
       this.score.computer++;
-      scoreMessage = 'Utanför!\nMotståndare får poäng!';
+      scoreMessage = 'Utanför!';
+      bgColor = 0xdc2626; // Red
     } else if (this.lastHitter === 'computer') {
       this.score.player++;
-      scoreMessage = 'Utanför!\nPoäng till dig!';
+      scoreMessage = 'Utanför!';
+      bgColor = 0x16a34a; // Green
     } else {
       this.score.computer++;
-      scoreMessage = 'Utanför!\nMotståndare poängterar!';
+      scoreMessage = 'Utanför!';
+      bgColor = 0xdc2626; // Red
     }
 
     this.onScoreUpdate({ ...this.score });
 
-    const gameOverText = this.add.text(this.scale.width / 2, this.scale.height / 2, `${scoreMessage}\nTryck för att fortsätta`, {
-      fontSize: '24px',
-      color: '#ff0000',
-      backgroundColor: '#000000',
-      padding: { x: 20, y: 10 },
-      align: 'center'
-    }).setOrigin(0.5);
+    const messageBox = this.createMessageBox(
+      scoreMessage,
+      'Tryck för att fortsätta',
+      bgColor,
+      '#ffffff'
+    );
 
     this.swipeHandler.setupRestartHandler(() => {
       console.log('Restart tapped');
-      gameOverText.destroy();
+      messageBox.container.destroy();
       this.physics.resume();
       this.serveShuttlecock();
       this.swipeHandler.setupHandlers();
