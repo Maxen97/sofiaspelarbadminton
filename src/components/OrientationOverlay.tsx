@@ -28,7 +28,7 @@ export default function OrientationOverlay() {
           display: none;
           align-items: center;
           justify-content: center;
-          z-index: 9999;
+          z-index: 10000;
           color: white;
           text-align: center;
         }
