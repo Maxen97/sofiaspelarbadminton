@@ -9,9 +9,10 @@ interface CharacterSelectProps {
   placeholder: string;
   selectedCharacter: Character | null;
   onSelect: (character: Character) => void;
+  variant?: 'default' | 'blue';
 }
 
-function CharacterSelect({ placeholder, selectedCharacter, onSelect }: CharacterSelectProps) {
+function CharacterSelect({ placeholder, selectedCharacter, onSelect, variant = 'default' }: CharacterSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +33,9 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect }: Character
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full aspect-square p-2 bg-white border-2 rounded-lg shadow-sm transition-all duration-200 ${
-          selectedCharacter ? 'border-gray-400 bg-gray-50 hover:border-gray-500' : 'border-gray-300 hover:border-gray-400'
+          variant === 'blue'
+            ? selectedCharacter ? 'border-blue-400 bg-blue-50 hover:border-blue-500' : 'border-blue-300 hover:border-blue-400'
+            : selectedCharacter ? 'border-gray-400 bg-gray-50 hover:border-gray-500' : 'border-gray-300 hover:border-gray-400'
         } focus:outline-none relative`}
       >
         {selectedCharacter ? (
@@ -66,8 +69,8 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect }: Character
                 }}
                 className={`aspect-square p-2 rounded-lg transition-colors duration-150 border-2 ${
                   selectedCharacter?.id === character.id
-                    ? 'bg-gray-100 border-gray-400'
-                    : 'hover:bg-gray-50 border-transparent hover:border-gray-200'
+                    ? variant === 'blue' ? 'bg-blue-100 border-blue-400' : 'bg-gray-100 border-gray-400'
+                    : variant === 'blue' ? 'hover:bg-blue-50 border-transparent hover:border-blue-200' : 'hover:bg-gray-50 border-transparent hover:border-gray-200'
                 }`}
               >
                 <div className="flex flex-col items-center justify-center h-full">
@@ -159,6 +162,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
               placeholder=""
               selectedCharacter={playerCharacter}
               onSelect={setPlayerCharacter}
+              variant="blue"
             />
           </div>
 
