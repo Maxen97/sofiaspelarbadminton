@@ -48,9 +48,6 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect }: Character
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full">
-            <div className="w-12 h-12 bg-gray-200 rounded-lg mb-1 flex items-center justify-center">
-              <span className="text-gray-400 text-lg">?</span>
-            </div>
             <span className="text-gray-500 text-xs text-center leading-tight">{placeholder}</span>
           </div>
         )}
@@ -159,7 +156,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
               Du
             </h2>
             <CharacterSelect
-              placeholder="Select your character"
+              placeholder=""
               selectedCharacter={playerCharacter}
               onSelect={setPlayerCharacter}
             />
@@ -171,7 +168,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
               Motståndare
             </h2>
             <CharacterSelect
-              placeholder="Select computer character"
+              placeholder=""
               selectedCharacter={computerCharacter}
               onSelect={setComputerCharacter}
             />
