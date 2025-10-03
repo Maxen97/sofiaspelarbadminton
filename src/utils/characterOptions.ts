@@ -6,21 +6,6 @@ export interface Character {
 }
 
 export const CHARACTER_OPTIONS: Character[] = [
- /*  {
-    id: 'male_2',
-    displayName: 'Male 2',
-    spriteBodyUrl: '/sprites/players/bodies/male_2.png',
-  },
-  {
-    id: 'female_2',
-    displayName: 'Female 2',
-    spriteBodyUrl: '/sprites/players/bodies/female_2.png',
-  },
-  {
-    id: 'female_3',
-    displayName: 'Female 3',
-    spriteBodyUrl: '/sprites/players/bodies/female_3.png',
-  }, */
   {
     id: 'sofia',
     displayName: 'Sofia',
@@ -32,6 +17,24 @@ export const CHARACTER_OPTIONS: Character[] = [
     displayName: 'Max',
     spriteBodyUrl: '/sprites/players/bodies/max.png',
     spriteHeadUrl: '/sprites/players/heads/max.png',
+  },
+  {
+    id: 'ani',
+    displayName: 'Ani',
+    spriteBodyUrl: '/sprites/players/bodies/ani.png',
+    spriteHeadUrl: '/sprites/players/heads/ani.png',
+  },
+  {
+    id: 'abhijit',
+    displayName: 'Abhijit',
+    spriteBodyUrl: '/sprites/players/bodies/abhijit.png',
+    spriteHeadUrl: '/sprites/players/heads/abhijit.png',
+  },
+  {
+    id: 'claudia',
+    displayName: 'Claudia',
+    spriteBodyUrl: '/sprites/players/bodies/claudia.png',
+    spriteHeadUrl: '/sprites/players/heads/claudia.png',
   },
 ];
 
