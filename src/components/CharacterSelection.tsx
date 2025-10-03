@@ -9,10 +9,9 @@ interface CharacterSelectProps {
   placeholder: string;
   selectedCharacter: Character | null;
   onSelect: (character: Character) => void;
-  accentColor: 'yellow' | 'red';
 }
 
-function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor }: CharacterSelectProps) {
+function CharacterSelect({ placeholder, selectedCharacter, onSelect }: CharacterSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -27,33 +26,14 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const accentColors = {
-    yellow: {
-      button: 'border-yellow-400 bg-yellow-50',
-      buttonHover: 'hover:border-yellow-500',
-      dropdown: 'border-yellow-200',
-      option: 'hover:bg-yellow-50',
-      optionSelected: 'bg-yellow-100',
-    },
-    red: {
-      button: 'border-red-400 bg-red-50',
-      buttonHover: 'hover:border-red-500',
-      dropdown: 'border-red-200',
-      option: 'hover:bg-red-50',
-      optionSelected: 'bg-red-100',
-    },
-  };
-
-  const colors = accentColors[accentColor];
-
   return (
     <div className="relative w-full max-w-[10rem] landscape:max-w-[8rem] mx-auto" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full aspect-square p-2 bg-white border-2 rounded-lg shadow-sm transition-all duration-200 ${
-          selectedCharacter ? colors.button : 'border-gray-300 hover:border-gray-400'
-        } ${colors.buttonHover} focus:outline-none relative`}
+          selectedCharacter ? 'border-gray-400 bg-gray-50 hover:border-gray-500' : 'border-gray-300 hover:border-gray-400'
+        } focus:outline-none relative`}
       >
         {selectedCharacter ? (
           <div className="flex flex-col items-center justify-center h-full">
@@ -77,7 +57,7 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
       </button>
 
       {isOpen && (
-        <div className={`absolute z-30 w-80 top-0 left-1/2 transform -translate-x-1/2 bg-white border-2 ${colors.dropdown} rounded-lg shadow-xl p-3 transition-all duration-200 animate-in fade-in-0 zoom-in-95`}>
+        <div className={`absolute z-30 w-80 top-0 left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-200 rounded-lg shadow-xl p-3 transition-all duration-200 animate-in fade-in-0 zoom-in-95`}>
           <div className="grid grid-cols-3 gap-2">
             {CHARACTER_OPTIONS.map((character) => (
               <button
@@ -89,8 +69,8 @@ function CharacterSelect({ placeholder, selectedCharacter, onSelect, accentColor
                 }}
                 className={`aspect-square p-2 rounded-lg transition-colors duration-150 border-2 ${
                   selectedCharacter?.id === character.id
-                    ? `${colors.optionSelected} ${colors.button.split(' ')[0]}`
-                    : `${colors.option} border-transparent hover:border-gray-200`
+                    ? 'bg-gray-100 border-gray-400'
+                    : 'hover:bg-gray-50 border-transparent hover:border-gray-200'
                 }`}
               >
                 <div className="flex flex-col items-center justify-center h-full">
@@ -168,7 +148,7 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
 
       <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full space-y-12 landscape:space-y-4 md:space-y-4">
         <h1 className="text-2xl landscape:text-xl md:text-3xl font-bold text-foreground text-center">
-          Välj Spelare
+          <b>Välj Spelare</b>
         </h1>
 
         {/* Character Selection Grid */}
@@ -182,7 +162,6 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
               placeholder="Select your character"
               selectedCharacter={playerCharacter}
               onSelect={setPlayerCharacter}
-              accentColor="yellow"
             />
           </div>
 
@@ -195,7 +174,6 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
               placeholder="Select computer character"
               selectedCharacter={computerCharacter}
               onSelect={setComputerCharacter}
-              accentColor="red"
             />
           </div>
         </div>
