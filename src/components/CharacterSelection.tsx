@@ -126,9 +126,10 @@ export default function CharacterSelection({ onSelectionComplete }: CharacterSel
     const defaultPlayer = CHARACTER_OPTIONS.find(char => char.id === 'sofia') || CHARACTER_OPTIONS[0];
     setPlayerCharacter(defaultPlayer);
 
-    // Random computer character
-    const randomIndex = Math.floor(Math.random() * CHARACTER_OPTIONS.length);
-    setComputerCharacter(CHARACTER_OPTIONS[randomIndex]);
+    // Random computer character (excluding Sofia)
+    const computerOptions = CHARACTER_OPTIONS.filter(char => char.id !== 'sofia');
+    const randomIndex = Math.floor(Math.random() * computerOptions.length);
+    setComputerCharacter(computerOptions[randomIndex]);
   }, []);
 
   const handleStartGame = () => {
