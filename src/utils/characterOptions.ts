@@ -36,6 +36,12 @@ export const CHARACTER_OPTIONS: Character[] = [
     spriteBodyUrl: '/sprites/players/bodies/claudia.png',
     spriteHeadUrl: '/sprites/players/heads/claudia.png',
   },
+  {
+    id: 'alina',
+    displayName: 'Alina',
+    spriteBodyUrl: '/sprites/players/bodies/alina.png',
+    spriteHeadUrl: '/sprites/players/heads/alina.png',
+  },
 ];
 
 export interface CharacterSelection {
