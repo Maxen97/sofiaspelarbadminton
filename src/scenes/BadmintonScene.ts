@@ -12,7 +12,6 @@ export class BadmintonScene extends Phaser.Scene {
   private shuttlecockTrail: Phaser.GameObjects.Graphics | null = null;
   private trailPositions: { x: number; y: number }[] = [];
   private gameState: GameState = 'ready';
-  private lastLogTime: number = 0;
   private score: GameScore = { player: 0, computer: 0 };
   private lastHitter: 'player' | 'computer' | null = null;
 
@@ -145,8 +144,6 @@ export class BadmintonScene extends Phaser.Scene {
 
       const courtDimensions = this.courtRenderer.getDimensions();
 
-      this.logPositionPeriodically(x, y, currentVelocity);
-
       const computerHit = this.computerAI.update(this.shuttlecock, width, courtDimensions.top);
       if (computerHit) {
         this.lastHitter = 'computer';
@@ -159,20 +156,10 @@ export class BadmintonScene extends Phaser.Scene {
       const sideBoundaryBuffer = 50;
       const topBoundaryBuffer = 200;
       if (x < -sideBoundaryBuffer || x > width + sideBoundaryBuffer || y < -topBoundaryBuffer) {
-        console.log('Out of bounds! Position:', x, y, 'Last hitter:', this.lastHitter);
         this.gameOverOutOfBounds();
       } else if (y > courtDimensions.bottom - 10) {
-        console.log('Bottom boundary crossed! Position:', x, y, 'Game state:', this.gameState);
         this.gameOver();
       }
-    }
-  }
-
-  private logPositionPeriodically(x: number, y: number, velocity: Phaser.Math.Vector2) {
-    const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-    if (Math.floor(this.time.now / 1000) !== this.lastLogTime) {
-      console.log('Shuttlecock - pos:', x.toFixed(1), y.toFixed(1), 'vel:', velocity.x.toFixed(1), velocity.y.toFixed(1), 'speed:', speed.toFixed(1));
-      this.lastLogTime = Math.floor(this.time.now / 1000);
     }
   }
 
@@ -207,21 +194,16 @@ export class BadmintonScene extends Phaser.Scene {
   }
 
   private hitShuttlecockWithSwipe(swipeVector: { x: number; y: number }, swipeDuration: number) {
-    console.log('hitShuttlecockWithSwipe called, swipeVector:', swipeVector, 'duration:', swipeDuration);
-
     if (this.gameState !== 'playing' || !this.shuttlecock) {
-      console.log('Game not in playing state or shuttlecock not available');
       return;
     }
 
     if (this.lastHitter === 'player') {
-      console.log('Cannot hit shuttlecock consecutively');
       return;
     }
 
     const velocity = GamePhysics.calculateSwipeVelocity(swipeVector, swipeDuration);
 
-    console.log('Direct swipe physics - horizontal:', velocity.x, 'vertical:', velocity.y);
     this.shuttlecock.setVelocity(velocity.x, velocity.y);
     this.lastHitter = 'player';
 
@@ -273,7 +255,6 @@ export class BadmintonScene extends Phaser.Scene {
   }
 
   private gameOver() {
-    console.log('Game over triggered');
     this.gameState = 'missed';
 
     this.swipeHandler.resetSwipeState();
@@ -318,7 +299,6 @@ export class BadmintonScene extends Phaser.Scene {
     );
 
     this.swipeHandler.setupRestartHandler(() => {
-      console.log('Restart tapped');
       messageBox.container.destroy();
       this.physics.resume();
       this.serveShuttlecock();
@@ -335,14 +315,12 @@ export class BadmintonScene extends Phaser.Scene {
     );
 
     this.swipeHandler.setupRestartHandler(() => {
-      console.log('Game started');
       messageBox.container.destroy();
       this.serveShuttlecock();
     });
   }
 
   private gameOverOutOfBounds() {
-    console.log('Game over: Out of bounds! Last hitter was:', this.lastHitter);
     this.gameState = 'missed';
 
     this.swipeHandler.resetSwipeState();
@@ -387,7 +365,6 @@ export class BadmintonScene extends Phaser.Scene {
     );
 
     this.swipeHandler.setupRestartHandler(() => {
-      console.log('Restart tapped');
       messageBox.container.destroy();
       this.physics.resume();
       this.serveShuttlecock();

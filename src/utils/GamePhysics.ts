@@ -61,9 +61,6 @@ export class GamePhysics {
     // Reduce velocity for upward shots to make them more challenging
     if (isUpwardShot) {
       totalMultiplier *= 0.2;
-      console.log(`Upward shot detected (${normalizedAngle.toFixed(1)}°) - velocity reduced by factor 5`);
-    } else {
-      console.log(`Shot angle: ${normalizedAngle.toFixed(1)}° - normal velocity`);
     }
 
     let horizontalVelocity = swipeVector.x * totalMultiplier;

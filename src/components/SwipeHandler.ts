@@ -51,8 +51,6 @@ export class SwipeHandler {
 
     this.swipeData.trail = this.scene.add.graphics();
     this.swipeData.trail.lineStyle(8, 0xffffff, 0.6);
-
-    console.log('Swipe started at:', pointer.x, pointer.y);
   }
 
   private handleSwipeMove(pointer: Phaser.Input.Pointer) {
@@ -79,20 +77,10 @@ export class SwipeHandler {
     const swipeDuration = this.scene.time.now - this.swipeData.startTime;
     const swipeDistance = Math.sqrt(swipeVector.x * swipeVector.x + swipeVector.y * swipeVector.y);
 
-    console.log('Swipe ended:', swipeVector, 'Distance:', swipeDistance, 'Duration:', swipeDuration);
-
     const isValidSwipe = this.validateSwipe(swipeVector, swipeDistance, swipeDuration);
 
     if (isValidSwipe) {
-      console.log('Valid swipe detected, hitting shuttlecock');
       this.onSwipeHit(swipeVector, swipeDuration);
-    } else {
-      console.log('Invalid swipe:', {
-        leftToRight: swipeVector.x > 0,
-        distance: swipeDistance,
-        duration: swipeDuration,
-        shuttlecockSide: this.isShuttlecockOnPlayerSide()
-      });
     }
 
     this.resetSwipeState();

@@ -53,7 +53,6 @@ export class ComputerAI {
       if (courtTop !== undefined) {
         const maxReachableHeight = courtTop - 100;
         if (y < maxReachableHeight) {
-          console.log('Shuttlecock too high to reach! Height:', y.toFixed(1), 'Max reachable:', maxReachableHeight.toFixed(1));
           return false;
         }
       }
@@ -61,7 +60,6 @@ export class ComputerAI {
       if (!this.state.hitTimer) {
         const reactionDelay = 200 + Math.random() * 200;
         this.state.hitTimer = this.scene.time.now + reactionDelay;
-        console.log('Computer preparing to hit in', reactionDelay.toFixed(0), 'ms');
       }
 
       if (this.scene.time.now >= this.state.hitTimer) {
@@ -80,16 +78,12 @@ export class ComputerAI {
   }
 
   private executeReturnShot(shuttlecock: Phaser.Physics.Arcade.Image) {
-    console.log('Computer is returning the shot!');
-
-    const { shot, velocities } = this.selectShot();
+    const { velocities } = this.selectShot();
 
     const placementVariation = (Math.random() - 0.5) * 40;
     const finalVerticalVelocity = velocities.vertical + placementVariation;
 
     shuttlecock.setVelocity(velocities.horizontal, finalVerticalVelocity);
-
-    console.log(`Computer returns with ${shot}: vel(${velocities.horizontal.toFixed(0)}, ${finalVerticalVelocity.toFixed(0)})`);
   }
 
   private selectShot(): { shot: ShotType; velocities: { horizontal: number; vertical: number } } {

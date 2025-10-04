@@ -108,7 +108,7 @@ const BadmintonGame = ({ characterSelection, onGameReady }: BadmintonGameProps) 
       window.removeEventListener('resize', handleResize);
       destroyGame();
     };
-  }, [characterSelection]);
+  }, [characterSelection, onGameReady]);
 
   return (
     <div className="relative w-full h-screen">
